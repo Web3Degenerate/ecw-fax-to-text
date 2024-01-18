@@ -132,7 +132,46 @@ class UserController extends Controller
     }
 
 
+// STOPPED USING pizza Type Hinting and went back to 'user' for the profile Following and profile Followers Tabs
+public function profileFollowing(User $user){
+
+        $currentlyFollowing = 0; //false by default (guests)
+        
+        if (auth()->check()) {  //if user logged in
+            $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
+        }
+        
+    return view('profile-following', 
+    [
+        'currentlyFollowing' => $currentlyFollowing,
+        'username' => $user->username,
+        'posts' => $user->posts()->latest()->get(),
+        'postCount' => $user->posts()->count()
+    ]);
+}
+
+
+// STOPPED USING pizza Type Hinting and went back to 'user' for the profile Following and profile Followers Tabs
+public function profileFollowers(User $user){
+
+    $currentlyFollowing = 0; //false by default (guests)
+    
+    if (auth()->check()) {  //if user logged in
+        $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
+    }
+    
+return view('profile-followers', 
+[
+    'currentlyFollowing' => $currentlyFollowing,
+    'username' => $user->username,
+    'posts' => $user->posts()->latest()->get(),
+    'postCount' => $user->posts()->count()
+]);
+}
+ 
 // (3:15) - Added form to edit avatar: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34470392#overview
+    //COME BACK AND FINISH AVATAR SECTION ATP:
+
     public function showAvatarForm(){
         return view('avatar-form');
     }

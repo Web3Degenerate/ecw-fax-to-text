@@ -53,7 +53,8 @@
 
 ---
 
-## Components instead of include()
+
+## Components instead of include() - Part 1
 - Starts [(11:50)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34130780#content)
 
 1. Create folder **components** in `/views` directory. Name matters. 
@@ -73,6 +74,48 @@
 </x-layout>
 
 ```
+
+## Components instead of include() - Part 2: **NESTED `components/` x-layouts**.
+
+- We revist the use of components to cut down on duplicate views in [video #41 around (3:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview) 
+
+- Recap: 
+    - **MOVE** the `profile-posts.blade.php` view where user can see their posts, followers, following. (view which loads when user clicks their icon) to our **2nd component, `components/profile.blade.php`**
+
+    - Instead move all of the code into our second layout in `views/components/profile.blade.php` so we can reuse it for each tab, **(1) Posts, (2) Followers, (3) Following**. 
+
+    - Then back in `views/profile-posts.blade.php`, strip out only the code which displays the default code for user's own posts and **wrap that code around our 2nd layout x tags**
+        - `<x-profile> </x-profile>`
+
+- Now in our `views/profile-posts.blade.php` (_Nested layout_, **x-layout => x-profile**), we will initially have trouble accessing some of our values. 
+
+- The solution is **similar to React's Props**
+
+```php
+//pass the values to our nested /components/layouts with "props":
+  <x-profile :avatar="$avatar"> //add in whenever we complete the avatar section/
+
+  </x-profile>
+
+// updated DCT view: 
+  <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing"
+  :postCount="$postCount">
+
+  </x-profile>
+
+```
+
+#### Setting up Tabs (_followers_ and _following_)
+- [Set up the routes for followers and following tabs (~7:44)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview)
+    
+    - See the `Profile Related Routes` section of web.php (_Controlled by `UserController.php`_)
+    - Duplicate the `profile()` function in `UserController.php` but rename `profileFollowing()` and `profileFollowers()` and return new blade templates for each (_profile-following_ and _profile_followers_).
+        - Copy and paste the stripped out template we are using for our original **profile-posts.blade.php** template, utilizing our *new x-profile nested layout*.
+    - **Video 41 - (9:55) - Update href values for each tab**, which is now in **/components/profile.blade.php**. 
+    - 
+
+
+---
 
 ### Laravel Sessions
 - Click 'inspect' => dev tools => 'Application' => 'Cookies' => site
@@ -109,12 +152,14 @@ Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
 ---
 
 ## **Middleware**
+- 
     - Protect pages - Unauthorized Redirect: 
     - Instead of using `!auth()->check()` like below
 
 ```php
     public function showCreateForm(){
-        //(~1:30) - Add redirect if /create-post accessed by guest:
+        //(~1:30) - Add redirect if /create-post accessed by guest: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview
+
         if (!auth()->check()) {
             return redirect('/');
         } 
@@ -122,6 +167,9 @@ Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
     }
 
 ```
+
+### Named Routes (**Zef used for admin routes**)
+- _I believe this was covered in Video #25, around minute 1:30?_. [Check link](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
 
 - In the `web.php` routes file add middleware with: 
 

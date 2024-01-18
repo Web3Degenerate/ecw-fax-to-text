@@ -84,10 +84,16 @@ Route::get('/post/{post}/edit', [PostController::class, 'showEditForm'])->middle
 Route::put('/post/{post}', [PostController::class, 'actuallyUpdate'])->middleware('can:update,post');
 
 
+
+
+
 // ****************************** PROFILE RELATED ROUTES ********************************************//
 
 Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
 
+// (7:25) - Set up routes for 'following' and 'follwer' tabs: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview
+Route::get('/profile/{user:username}/followers', [UserController::class, 'profileFollowers']);
+Route::get('/profile/{user:username}/following', [UserController::class, 'profileFollowing']);
 
 
 // **************************** GATE *************************************//

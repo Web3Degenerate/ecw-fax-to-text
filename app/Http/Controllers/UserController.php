@@ -25,6 +25,16 @@ class UserController extends Controller
         }
     }
 
+// &&& #DCT &&& #############################################################################################################
+    public function showEnrollForm(){
+        //Logged in user can register another user:
+            if (auth()->check()) {
+                return view('homepage-enroll');
+            } else {
+        // redirect back to GUEST homepage:
+                return redirect('/')->with('failure', 'You do not have the permissions to create a patient account.');
+            }  
+    }
 
 //Added logout function: (2:05): https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview
     public function logout(){

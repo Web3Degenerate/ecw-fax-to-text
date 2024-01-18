@@ -35,6 +35,10 @@ Route::get('/', [UserController::class, 'showCorrectHomepage'])->name('login');
 // Route::get('/about', [ExampleController::class, 'aboutPage']);
 //Register user route: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207604#content
 Route::post('/register', [UserController::class, 'register'])->middleware('guest');
+
+// &&& #DCT &&& #############################################################################################################
+Route::get('/enroll', [UserController::class, 'showEnrollForm'])->name('login');
+
 //Add login route: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207654#overview
 Route::post('/login', [UserController::class, 'login'])->middleware('guest');
 //Added logout route: (1:50): https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview

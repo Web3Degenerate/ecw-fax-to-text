@@ -1,62 +1,40 @@
 <x-layout>
 
-  <h2>{{$name}}</h2>
-  <h5>{{$catname}}</h5>
-  
-  <ul>
-      @foreach($allAnimals as $animal)
-      <li>{{ $animal }}</li>
-      @endforeach
-  </ul>
-
     <div class="container py-md-5">
       <div class="row align-items-center">
-        <div class="col-lg-7 py-3 py-md-5">
-          <h1 class="display-3">Remember Writing?</h1>
-          <p class="lead text-muted">Are you sick of short tweets and impersonal &ldquo;shared&rdquo; posts that are reminiscent of the late 90&rsquo;s email forwards? We believe getting back to actually writing is the key to enjoying the internet again.</p>        
-        </div>
+  {{-- LEFT COLUMN --}}
+            <div class="col-lg-7 py-3 py-md-5">
+              <h1 class="display-5">Manage Patient Time</h1>
+              <p class="lead text-muted">Log in to manage your patients&rsquo; &ldquo;Digital Online E-M&rdquo; encounters as they are sent from your EHR/EMR.</p>        
+            </div>
+  {{-- RIGHT COLUMN --}}
+            <div class="col-lg-5 pl-lg-5 pb-3 py-lg-5">
 
-        <div class="col-lg-5 pl-lg-5 pb-3 py-lg-5">
-                      <form action="/register" method="POST" id="registration-form">
-                        @csrf
-                        <div class="form-group">
-                          <label for="username-register" class="text-muted mb-1"><small>Username</small></label>
-                          <input value="{{old('username')}}" name="username" id="username-register" class="form-control" type="text" placeholder="Pick a username" autocomplete="off" />
-                        {{-- (11:50) Added error message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview --}}
-                          @error('username')
-                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                          @enderror
-                      </div>
+  {{-- &&& #DCT &&& CONVERTED TO LOG IN ROUTE --}}
+  {{-- <form action="/register" method="POST" id="registration-form"> --}}
+                  <form action="/login" method="POST" class="mb-0 pt-2 pt-md-0" id="registration-form">
+                            @csrf
+                            <div class="form-group">
+                              <label for="username-register" class="text-muted mb-1"><small>Username/Email</small></label>
+                              <input value="{{old('loginusername')}}" name="loginusername" id="username-register" class="form-control" type="text" placeholder="Enter Your Username/Email" autocomplete="off" />
+                            {{-- (11:50) Added error message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview --}}
+                              @error('loginusername')
+                                <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                              @enderror
+                          </div>
 
-                        <div class="form-group">
-                          <label for="email-register" class="text-muted mb-1"><small>Email</small></label>
-                          <input value="{{old('email')}}" name="email" id="email-register" class="form-control" type="text" placeholder="you@example.com" autocomplete="off" />
-                          @error('email')
-                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                          @enderror
-                        </div>
+                            <div class="form-group">
+                              <label for="password-register" class="text-muted mb-1"><small>Password</small></label>
+                              <input name="loginpassword" id="password-register" class="form-control" type="password" placeholder="Enter your password" />
+                              @error('loginpassword')
+                                <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                              @enderror
+                            </div>
 
-                        <div class="form-group">
-                          <label for="password-register" class="text-muted mb-1"><small>Password</small></label>
-                          <input name="password" id="password-register" class="form-control" type="password" placeholder="Create a password" />
-                          @error('password')
-                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                          @enderror
-                        </div>
+                            <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Sign In</button>
+                  </form>
 
-                        <div class="form-group">
-                          <label for="password-register-confirm" class="text-muted mb-1"><small>Confirm Password</small></label>
-                          {{-- <input name="password" id="password-register-confirm" class="form-control" type="password" placeholder="Confirm password" /> --}}
-                          {{-- updated in (5:50): setup 'confirm' https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#content --}}
-                          <input name="password_confirmation" id="password-register-confirm" class="form-control" type="password" placeholder="Confirm password" />
-                          @error('password_confirmation')
-                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                          @enderror
-                        </div>
-
-                        <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Sign up for OurApp</button>
-                      </form>
-        </div>
+            </div>
 
       </div>
     </div>

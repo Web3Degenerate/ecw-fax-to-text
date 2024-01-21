@@ -2,9 +2,10 @@
 
 {{-- Copied template for default profile-posts tab (users own posts when clicking on avatar) --}}
 
-  {{-- TO DO- ADD IN AVATAR WHEN SECTION COMPLETED: <x-profile :avatar="$avatar"> --}}
-    <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing"
-    :postCount="$postCount">
+  {{-- TO DO- ADD IN AVATAR WHEN SECTION COMPLETED: <x-profile :avatar="$avatar"> (and add to UserController getSharedData($user) private function) --}}
+    {{-- So these three Props can be replaced with $sharedData --}}
+    {{-- <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing" :postCount="$postCount"> --}}
+        <x-profile :sharedData="$sharedData">
   
           <div class="list-group">
             @foreach($posts as $post)

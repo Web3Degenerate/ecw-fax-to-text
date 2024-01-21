@@ -1,8 +1,9 @@
 {{-- Created (~9:30): https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview --}}
 
   {{-- TO DO- ADD IN AVATAR WHEN SECTION COMPLETED: <x-profile :avatar="$avatar"> --}}
-    <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing"
-    :postCount="$postCount">
+    {{-- <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing"
+    :postCount="$postCount"> --}}
+    <x-profile :sharedData="$sharedData">
   
           <div class="list-group">
             @foreach($posts as $post)

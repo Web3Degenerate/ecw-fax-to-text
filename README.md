@@ -103,6 +103,15 @@
 
   </x-profile>
 
+//UPDATE: At () of 
+// We use a single private function to return the $username, $currentlyFollowing and $postCount for
+// the other two tabs using functions profileFollowing and profileFollowers which returns the three
+// variables above in an array called '$sharedData' so we HAVE to update our Props or else we'll get an error
+// So this: 
+<x-profile :username="$username" :currentlyFollowing="$currentlyFollowing" :postCount="$postCount">
+// Simply becomes: 
+<x-profile :sharedData="$sharedData">
+
 ```
 
 #### Setting up Tabs (_followers_ and _following_)
@@ -112,7 +121,23 @@
     - Duplicate the `profile()` function in `UserController.php` but rename `profileFollowing()` and `profileFollowers()` and return new blade templates for each (_profile-following_ and _profile_followers_).
         - Copy and paste the stripped out template we are using for our original **profile-posts.blade.php** template, utilizing our *new x-profile nested layout*.
     - **Video 41 - (9:55) - Update href values for each tab**, which is now in **/components/profile.blade.php**. 
-    - 
+
+- **Video 42** - [starts with the css effects to show a tab is **active**](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#overview)
+
+    - setup ternary operator in `{{ }}` to handle which href tab is active.
+    - use new **Request::segment(3)** which pertains to each '/' after base domain. 
+        - Using our setup, when a tab is active, it **HAS** a _third segment_, ie: `/(1)profile/(2)username/(3)following`
+        - 
+
+
+
+### Private functions in Controllers (_in this case, to handle duplicate code_)
+- See [(3:28)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#notes)
+    - Applied to `profile()`, `profileFollowing()` and `profileFollowers()` functions in `UserController`.
+
+    - In the **private** function which handles our duplicate code, we will use Laravel's facade, **View::share()**
+        - Format: `View::share('label', 'variable or array of variables to share')`
+        - x
 
 
 ---

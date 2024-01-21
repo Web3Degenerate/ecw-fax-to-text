@@ -11,8 +11,11 @@
 {{-- <x-profile> PASS IN VALUES VIA "PROPS"--}}
 
   {{-- TO DO- ADD IN AVATAR WHEN SECTION COMPLETED: <x-profile :avatar="$avatar"> --}}
-  <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing"
-  :postCount="$postCount">
+{{-- Props on 'profile-posts' stays the same because we used Type Hint of $pizza --}}
+
+{{-- So these three Props can be replaced with $sharedData --}}
+    {{-- <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing" :postCount="$postCount"> --}}
+      <x-profile :sharedData="$sharedData">
 
         <div class="list-group">
           @foreach($posts as $post)

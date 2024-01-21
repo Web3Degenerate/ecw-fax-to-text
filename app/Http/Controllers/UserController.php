@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Follow;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\View;
 
 class UserController extends Controller
 {
@@ -94,6 +95,31 @@ class UserController extends Controller
     }
 
 
+
+// *************************** PROFILE RELATED FUNCTIONS **************************************//
+
+// (3:45) - Set up private function to handle duplicate code in tab functions: 
+// BECAUSE I AM KEEPING profile(User $pizza) TYPE HINTING, ONLY APPLY TO profile Followers and Following:
+    private function getSharedData($user) {
+        $currentlyFollowing = 0; //false by default (guests)
+        
+        if (auth()->check()) {  //if user logged in
+            $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
+        }
+
+        //(~4:00): Use Laravel Class or Facade called 'View' which has a static method of 'share'
+//MUST IMPORT 'View'
+            // We can 'share' a variable and it will be available in our blade template:
+            // View::share('label', 'variable or array of variables to share')
+        View::share('sharedData', 
+        [
+            'currentlyFollowing' => $currentlyFollowing,
+            'username' => $user->username,
+            // 'posts' => $pizza->posts()->latest()->get(),
+            'postCount' => $user->posts()->count()
+        ]);
+    }
+
 // *** ~(2:40) - Set up view for individual patient view: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview
     // GET INSTANCE OF USER with TYPE HINTING = User <{name-used-in-routes}>
 
@@ -121,54 +147,72 @@ class UserController extends Controller
 
                 // (12:35) - Return on one line: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview
             
-            //(3:20) - Added currentlyFollowing to the view array. Missing his avatar value in this function: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34476624#overview
-        return view('profile-posts', 
+                // (~min 7-9ish) Updated the return array used in fn getSharedData manually because we wanted to preserve the pizza type hinting example: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#notes
+        View::share('sharedData', 
         [
             'currentlyFollowing' => $currentlyFollowing,
+            // 'username' => $user->username,
             'username' => $pizza->username,
-            'posts' => $pizza->posts()->latest()->get(),
+            // 'posts' => $pizza->posts()->latest()->get(),
+            // 'postCount' => $user->posts()->count()
             'postCount' => $pizza->posts()->count()
+        ]);
+        
+        return view('profile-posts', 
+        [
+                //(3:20) - Added currentlyFollowing to the view array. Missing his avatar value in this function: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34476624#overview
+                // (~min 7-9) cleaned up with $sharedData: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#notes
+                // 'currentlyFollowing' => $currentlyFollowing,
+                // 'username' => $pizza->username,
+                // 'postCount' => $pizza->posts()->count(),
+            'posts' => $pizza->posts()->latest()->get()
         ]);
     }
 
 
 // STOPPED USING pizza Type Hinting and went back to 'user' for the profile Following and profile Followers Tabs
-public function profileFollowing(User $user){
+    public function profileFollowing(User $user){
+            // $currentlyFollowing = 0; //false by default (guests)        
+            // if (auth()->check()) {  //if user logged in
+            //     $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
+            // }     
+            
+        $this->getSharedData($user);    
 
-        $currentlyFollowing = 0; //false by default (guests)
-        
-        if (auth()->check()) {  //if user logged in
-            $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
-        }
-        
-    return view('profile-following', 
-    [
-        'currentlyFollowing' => $currentlyFollowing,
-        'username' => $user->username,
-        'posts' => $user->posts()->latest()->get(),
-        'postCount' => $user->posts()->count()
-    ]);
-}
+        return view('profile-following', 
+        [
+            // 'currentlyFollowing' => $currentlyFollowing,
+            // 'username' => $user->username,
+            // 'postCount' => $user->posts()->count(),
+            'posts' => $user->posts()->latest()->get()
+        ]);
+    }
 
 
 // STOPPED USING pizza Type Hinting and went back to 'user' for the profile Following and profile Followers Tabs
-public function profileFollowers(User $user){
+    public function profileFollowers(User $user){
+        // $currentlyFollowing = 0; //false by default (guests)   
+        // if (auth()->check()) {  //if user logged in
+        //     $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
+        // }  
+        
+        $this->getSharedData($user);
 
-    $currentlyFollowing = 0; //false by default (guests)
-    
-    if (auth()->check()) {  //if user logged in
-        $currentlyFollowing = Follow::where([['user_id', '=', auth()->user()->id], ['followeduser', '=', $user->id]])->count();
+        return view('profile-followers', 
+        [
+            // 'currentlyFollowing' => $currentlyFollowing,
+            // 'username' => $user->username,
+            // 'postCount' => $user->posts()->count(),
+            'posts' => $user->posts()->latest()->get()
+        ]);
     }
-    
-return view('profile-followers', 
-[
-    'currentlyFollowing' => $currentlyFollowing,
-    'username' => $user->username,
-    'posts' => $user->posts()->latest()->get(),
-    'postCount' => $user->posts()->count()
-]);
-}
  
+
+
+
+
+
+
 // (3:15) - Added form to edit avatar: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34470392#overview
     //COME BACK AND FINISH AVATAR SECTION ATP:
 

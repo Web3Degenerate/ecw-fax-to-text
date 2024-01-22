@@ -53,4 +53,10 @@ class User extends Authenticatable
         return $this->hasMany(Post::class, 'user_id');
     }
 
+// Added (1:29) relationship b/t a User and a Follow: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes
+    public function followers() {
+        //a user has many follows (think of rows in follows table).
+        return $this->hasMany(Follows::class, 'followeduser');
+    }
+
 }

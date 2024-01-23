@@ -72,12 +72,41 @@ class UserController extends Controller
     }
 
 
+    // public function register(Request $request){
+    //     $incomingFields = $request->validate([
+    //         // 'username' => 'required', //updated to array in https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#content
+    //         'username' => ['required', 'min:3', 'max:20', Rule::unique('users', 'username')],
+    //         'email' => ['required', 'email', Rule::unique('users', 'email')],
+    //         'password' => ['required', 'min:8', 'confirmed'],
+    //     ]);
+
+    //     // (7:30) - encrypt password before saving to DB: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview
+    //     //look inside associative array
+    //     $incomingFields['password'] = bcrypt($incomingFields['password']);
+    //     // User::create($incomingFields); //creates new user in DB 
+    //     $user = User::create($incomingFields); //creates new user && save to local variable 
+        
+    //     // (16:50): Log in newly registered user: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview
+    //     auth()->login($user); //sends along cookie session so user logged in
+        
+    //     // return 'Connection to UserController success';
+    //     // (16:15) - return redirect to '/' with success message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview
+    //     return redirect('/')->with('success', 'Thank you for creating an account');
+    // }
+
+// &&& #DCT &&& register function:
     public function register(Request $request){
         $incomingFields = $request->validate([
             // 'username' => 'required', //updated to array in https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#content
             'username' => ['required', 'min:3', 'max:20', Rule::unique('users', 'username')],
             'email' => ['required', 'email', Rule::unique('users', 'email')],
             'password' => ['required', 'min:8', 'confirmed'],
+            //&&& #DCT NEW FIELDS &&&
+            'name' => ['required'],
+            'mrn' => ['required', Rule::unique('users', 'mrn')],
+            'dob' => ['required'],
+            // 'provider' => ['required'],
+            'provider' => ['required', Rule::in([1, 2, 3])], // Add Rule::in rule for the 'provider' field
         ]);
 
         // (7:30) - encrypt password before saving to DB: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview
@@ -93,7 +122,6 @@ class UserController extends Controller
         // (16:15) - return redirect to '/' with success message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview
         return redirect('/')->with('success', 'Thank you for creating an account');
     }
-
 
 
 // *************************** PROFILE RELATED FUNCTIONS **************************************//

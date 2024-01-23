@@ -1,44 +1,49 @@
-
 ## Commands
 
-1. Create Laravel Project with Composer: 
+1. Create Laravel Project with Composer:
+
     - `composer create-project laravel/laravel <name-of-app>`
 
+2. Spin up local server:
 
-2. Spin up local server: 
     - `php artisan serve`
 
 3. Controller
+
     - `php artisan make:controller ExampleController`
 
 4. Database Migrations
-    - Run migration files: 
+
+    - Run migration files:
         - `php artisan migrate`
     - Fresh command ONLY when empty DB tables
-        - This drops EVERY table in the DB, starts fresh, so you can edit the original migration file with your changes. 
+        - This drops EVERY table in the DB, starts fresh, so you can edit the original migration file with your changes.
         - `php artisan migrate:fresh`
     - Modify table **WHEN YOU HAVE DATA** - create new migration file
         - `php artisan make:migration add_favorite_column_to_users`
         - After set up new migration file execute with _php artisan migrate_
-    - Later, add isAdmin column to Users table: 
+    - Later, add isAdmin column to Users table:
         - `php artisan make:migration add_isadmin_column_to_users_table --table=users`
             - the `--table=users` flag adds some boiler plate in the migration file for us.
 
-5. Set up NEW migration file for a new table: 
+5. Set up NEW migration file for a new table:
+
     - `php artisan make:migration create_posts_table`
         - _execute migration file with_ `php artisan migrate`
 
-6. Set up NEW model with: 
-     - `php artisan make:model Post`
+6. Set up NEW model with:
+
+    - `php artisan make:model Post`
         - _He used singular for both Controller and Model_
 
-7. Set up your own custom **Middleware** with this command: 
-    - `php artisan make:middleware MustBeLoggedIn`
-        - Add your code. 
-        - Add to `/Http/Kernel.php`, towards the botttom, as described around [(12:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400816#overview)
-        - 
+7. Set up your own custom **Middleware** with this command:
 
-8. Create a Laravel Policy with command: 
+    - `php artisan make:middleware MustBeLoggedIn`
+        - Add your code.
+        - Add to `/Http/Kernel.php`, towards the botttom, as described around [(12:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400816#overview)
+        -
+
+8. Create a Laravel Policy with command:
     - `php artisan make:policy PostPolicy --model=Post`
 
 ---
@@ -49,20 +54,20 @@
 
 1. [Project Repo Here](https://github.com/LearnWebCode/laravel-course)
 
-2.  Markdown. [Best Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+2. Markdown. [Best Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 
 ---
 
-
 ## Components instead of include() - Part 1
-- Starts [(11:50)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34130780#content)
 
-1. Create folder **components** in `/views` directory. Name matters. 
+-   Starts [(11:50)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34130780#content)
+
+1. Create folder **components** in `/views` directory. Name matters.
 2. Create `views/components/layout.blade.php` (_file name not matter_).
 3. Add Header code
 4. Add `{{$slot}}` to display dynamic content
 5. Add Footer Code
-6. Add to `homepage.blade.php` with this syntax: 
+6. Add to `homepage.blade.php` with this syntax:
 
 ```php
 //Instead of include
@@ -77,19 +82,20 @@
 
 ## Components instead of include() - Part 2: **NESTED `components/` x-layouts**.
 
-- We revist the use of components to cut down on duplicate views in [video #41 around (3:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview) 
+-   We revist the use of components to cut down on duplicate views in [video #41 around (3:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview)
 
-- Recap: 
-    - **MOVE** the `profile-posts.blade.php` view where user can see their posts, followers, following. (view which loads when user clicks their icon) to our **2nd component, `components/profile.blade.php`**
+-   Recap:
 
-    - Instead move all of the code into our second layout in `views/components/profile.blade.php` so we can reuse it for each tab, **(1) Posts, (2) Followers, (3) Following**. 
+    -   **MOVE** the `profile-posts.blade.php` view where user can see their posts, followers, following. (view which loads when user clicks their icon) to our **2nd component, `components/profile.blade.php`**
 
-    - Then back in `views/profile-posts.blade.php`, strip out only the code which displays the default code for user's own posts and **wrap that code around our 2nd layout x tags**
-        - `<x-profile> </x-profile>`
+    -   Instead move all of the code into our second layout in `views/components/profile.blade.php` so we can reuse it for each tab, **(1) Posts, (2) Followers, (3) Following**.
 
-- Now in our `views/profile-posts.blade.php` (_Nested layout_, **x-layout => x-profile**), we will initially have trouble accessing some of our values. 
+    -   Then back in `views/profile-posts.blade.php`, strip out only the code which displays the default code for user's own posts and **wrap that code around our 2nd layout x tags**
+        -   `<x-profile> </x-profile>`
 
-- The solution is **similar to React's Props**
+-   Now in our `views/profile-posts.blade.php` (_Nested layout_, **x-layout => x-profile**), we will initially have trouble accessing some of our values.
+
+-   The solution is **similar to React's Props**
 
 ```php
 //pass the values to our nested /components/layouts with "props":
@@ -97,73 +103,90 @@
 
   </x-profile>
 
-// updated DCT view: 
+// updated DCT view:
   <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing"
   :postCount="$postCount">
 
   </x-profile>
 
-//UPDATE: At () of 
+//UPDATE: At () of
 // We use a single private function to return the $username, $currentlyFollowing and $postCount for
 // the other two tabs using functions profileFollowing and profileFollowers which returns the three
 // variables above in an array called '$sharedData' so we HAVE to update our Props or else we'll get an error
-// So this: 
+// So this:
 <x-profile :username="$username" :currentlyFollowing="$currentlyFollowing" :postCount="$postCount">
-// Simply becomes: 
+// Simply becomes:
 <x-profile :sharedData="$sharedData">
 
 ```
 
 #### Setting up Tabs (_followers_ and _following_)
-- [Set up the routes for followers and following tabs (~7:44)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview)
-    
-    - See the `Profile Related Routes` section of web.php (_Controlled by `UserController.php`_)
-    - Duplicate the `profile()` function in `UserController.php` but rename `profileFollowing()` and `profileFollowers()` and return new blade templates for each (_profile-following_ and _profile_followers_).
-        - Copy and paste the stripped out template we are using for our original **profile-posts.blade.php** template, utilizing our *new x-profile nested layout*.
-    - **Video 41 - (9:55) - Update href values for each tab**, which is now in **/components/profile.blade.php**. 
 
-- **Video 42** - [starts with the css effects to show a tab is **active**](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#overview)
+-   [Set up the routes for followers and following tabs (~7:44)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview)
 
-    - setup ternary operator in `{{ }}` to handle which href tab is active.
-    - use new **Request::segment(3)** which pertains to each '/' after base domain. 
-        - Using our setup, when a tab is active, it **HAS** a _third segment_, ie: `/(1)profile/(2)username/(3)following`
-        - 
-- **Video 43** - [Set up relationship in User.php for followers()](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes)
-    - Around 6th minute, test the json returned by calling our `followers()` function set up in `User.php` via the `UserController => followers()` function:
+    -   See the `Profile Related Routes` section of web.php (_Controlled by `UserController.php`_)
+    -   Duplicate the `profile()` function in `UserController.php` but rename `profileFollowing()` and `profileFollowers()` and return new blade templates for each (_profile-following_ and _profile_followers_).
+        -   Copy and paste the stripped out template we are using for our original **profile-posts.blade.php** template, utilizing our _new x-profile nested layout_.
+    -   **Video 41 - (9:55) - Update href values for each tab**, which is now in **/components/profile.blade.php**.
+
+-   **Video 42** - [starts with the css effects to show a tab is **active**](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#overview)
+
+    -   setup ternary operator in `{{ }}` to handle which href tab is active.
+    -   use new **Request::segment(3)** which pertains to each '/' after base domain.
+        -   Using our setup, when a tab is active, it **HAS** a _third segment_, ie: `/(1)profile/(2)username/(3)following`
+        -
+
+-   **Video 43** - [Set up relationship in User.php for followers()](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes)
+    -   Around 6th minute, test the json returned by calling our `followers()` function set up in `User.php` via the `UserController => followers()` function:
 
 ```js
 //The followers of Brad (Barksalot and Meowsalot)
-[{"id":3,"user_id":2,"followeduser":1,"created_at":"2024-01-18T00:39:26.000000Z","updated_at":"2024-01-18T00:39:26.000000Z"},
-{"id":2,"user_id":3,"followeduser":1,"created_at":"2024-01-18T00:34:07.000000Z","updated_at":"2024-01-18T00:34:07.000000Z"}]
+[
+    {
+        id: 3,
+        user_id: 2,
+        followeduser: 1,
+        created_at: "2024-01-18T00:39:26.000000Z",
+        updated_at: "2024-01-18T00:39:26.000000Z",
+    },
+    {
+        id: 2,
+        user_id: 3,
+        followeduser: 1,
+        created_at: "2024-01-18T00:34:07.000000Z",
+        updated_at: "2024-01-18T00:34:07.000000Z",
+    },
+];
 ```
 
-
 ### Private functions in Controllers (_in this case, to handle duplicate code_)
-- See [(3:28)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#notes)
-    - Applied to `profile()`, `profileFollowing()` and `profileFollowers()` functions in `UserController`.
 
-    - In the **private** function which handles our duplicate code, we will use Laravel's facade, **View::share()**
-        - Format: `View::share('label', 'variable or array of variables to share')`
-        - x
+-   See [(3:28)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503226#notes)
 
+    -   Applied to `profile()`, `profileFollowing()` and `profileFollowers()` functions in `UserController`.
+
+    -   In the **private** function which handles our duplicate code, we will use Laravel's facade, **View::share()**
+        -   Format: `View::share('label', 'variable or array of variables to share')`
+        -   x
 
 ---
 
 ### Laravel Sessions
-- Click 'inspect' => dev tools => 'Application' => 'Cookies' => site
-    - see `laravel_session`
-- Display logged in user's name with `{{auth()->user()->username}}`. See [(19:11)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207654#overview)
 
-- 
+-   Click 'inspect' => dev tools => 'Application' => 'Cookies' => site
+    -   see `laravel_session`
+-   Display logged in user's name with `{{auth()->user()->username}}`. See [(19:11)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207654#overview)
 
+-
 
 ### Useful Tips
 
-- Save user input between attempts: 
-    - use `value="{{old('field-name')}}`. See [(16:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview)
-    - 
+-   Save user input between attempts:
 
-- To look up user by field **other than id** simply specify in the routes like this: 
+    -   use `value="{{old('field-name')}}`. See [(16:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview)
+    -
+
+-   To look up user by field **other than id** simply specify in the routes like this:
 
 ```php
 // web.php
@@ -179,14 +202,12 @@ Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
 
 ```
 
-
-
 ---
 
 ## **Middleware**
-- 
-    - Protect pages - Unauthorized Redirect: 
-    - Instead of using `!auth()->check()` like below
+
+-   -   Protect pages - Unauthorized Redirect:
+    -   Instead of using `!auth()->check()` like below
 
 ```php
     public function showCreateForm(){
@@ -194,34 +215,37 @@ Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
 
         if (!auth()->check()) {
             return redirect('/');
-        } 
+        }
         return view('create-post');
     }
 
 ```
 
 ### Named Routes (**Zef used for admin routes**)
-- _I believe this was covered in Video #25, around minute 1:30?_. [Check link](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
 
-- In the `web.php` routes file add middleware with: 
+-   _I believe this was covered in Video #25, around minute 1:30?_. [Check link](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
+
+-   In the `web.php` routes file add middleware with:
 
 ```php
 
-//Add ->middleware('auth') 
+//Add ->middleware('auth')
 Route:: get('/create-post', [PostController::class, 'showCreateForm'])->middleware('auth');
 
 //This requires us to 'name' one of our other routes as 'login' for laravel to send the redirect
 ```
 
-
 ---
+
 ### Policy
-- See [(~4:00)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426438#overview)
 
-- Create a policy from terminal with command: 
-    - `php artisan make:policy PostPolicy --model=Post`
+-   See [(~4:00)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426438#overview)
 
-- Laravel's Policy allows us to avoid having to do things like check if the currently logged in user is the user of the a given post: 
+-   Create a policy from terminal with command:
+
+    -   `php artisan make:policy PostPolicy --model=Post`
+
+-   Laravel's Policy allows us to avoid having to do things like check if the currently logged in user is the user of the a given post:
 
 ```php
 
@@ -235,7 +259,7 @@ Route:: get('/create-post', [PostController::class, 'showCreateForm'])->middlewa
 
 ```
 
-- Update the Policies you want to control, _in this example, edit and delete_ in the new folder `Http/Policies/PostPolicy.php`
+-   Update the Policies you want to control, _in this example, edit and delete_ in the new folder `Http/Policies/PostPolicy.php`
 
 ```php
 
@@ -255,17 +279,16 @@ Route:: get('/create-post', [PostController::class, 'showCreateForm'])->middlewa
     }
 ```
 
-- Finally, register our new **PostPolicy.php** in `App/Providers/AuthServiceProviders.php` in the `protected $policies` array, let Laravel know what class our new custom policy should be applied to: 
+-   Finally, register our new **PostPolicy.php** in `App/Providers/AuthServiceProviders.php` in the `protected $policies` array, let Laravel know what class our new custom policy should be applied to:
 
 ```php
 // Added (7:55): https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426438#overview
-    
+
     protected $policies = [
         Post::class => PostPolicy::class
     ];
 
 ```
-
 
 ```php
 
@@ -278,14 +301,16 @@ Route:: get('/create-post', [PostController::class, 'showCreateForm'])->middlewa
 ---
 
 ## Install MySQL on Windows
+
 [View tutorial here](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34182370#content)
 
-1. Visit [mysql.com](https://www.mysql.com/) and follow google doc instructions. 
+1. Visit [mysql.com](https://www.mysql.com/) and follow google doc instructions.
 
 ---
- 
+
 ## Connect Local Laravel to Local MySQL - **migrations**
-- **Source:** [See tutorial here.](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34197742#content)
+
+-   **Source:** [See tutorial here.](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34197742#content)
 
 1. Connect to DB in `.env` file
 
@@ -299,11 +324,11 @@ DB_PASSWORD=rootroot
 
 ```
 
-2. in the **migrations** directory we have the default migrations from Laravel. 
+2. in the **migrations** directory we have the default migrations from Laravel.
 
-3. Run the migrate command from terminal in project directory to create the default tables laravel has created for us: 
+3. Run the migrate command from terminal in project directory to create the default tables laravel has created for us:
+
     - `php artisan migrate`
-
 
 4. Recap Creating a local MySQL database at [Video 18. (6:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34182370#overview)
     - Recap of the laravel migrations at [Video 20. (~6:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34197742#overview)
@@ -311,17 +336,18 @@ DB_PASSWORD=rootroot
 
 ---
 
+## Set up Notes (Posts) Database
 
-## Set up Notes (Posts) Database 
-- Started [Video 25. (9:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
+-   Started [Video 25. (9:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
 
-- Set up migration file for posts db with command: 
-    - `php artisan make:migration create_posts_table`
+-   Set up migration file for posts db with command:
 
-    - See around [Video 25. (13:00)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview) to see how the migration file was set up between `users` and `posts`
+    -   `php artisan make:migration create_posts_table`
 
-    - Run the migration file with: 
-        - `php artisan migrate`
+    -   See around [Video 25. (13:00)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview) to see how the migration file was set up between `users` and `posts`
+
+    -   Run the migration file with:
+        -   `php artisan migrate`
 
 ```php
     public function up(): void
@@ -337,15 +363,15 @@ DB_PASSWORD=rootroot
 
 ```
 
-- Set up model for Posts with this command: 
-    - He used **singular Post**
-    - `php artisan make:model Post`
-
+-   Set up model for Posts with this command:
+    -   He used **singular Post**
+    -   `php artisan make:model Post`
 
 ### Set up foreign key relationship in **Post.php** model to User
-- See [Video 27. (1:20)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351482#overview)
 
-- Add the relationship b/t Post and User (`belongsTo`) in **Post.php**
+-   See [Video 27. (1:20)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351482#overview)
+
+-   Add the relationship b/t Post and User (`belongsTo`) in **Post.php**
 
 ```php
 //Post.php
@@ -354,15 +380,17 @@ DB_PASSWORD=rootroot
     public function pizza(){
         //this is Post object as a whole
         // look inside '$this' and call method 'belongs to'
-                        //(1) Class belongs to, (2) Column powered by. Column powers the lookup or join. 
+                        //(1) Class belongs to, (2) Column powered by. Column powers the lookup or join.
         return $this->belongsTo(User::class, 'user_id');
     }
 
 ```
-### Set up User-Post relationship in **User.php** model: 
-- This was covered around [(8:55)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview)
 
-- Here is the **User.php** function we added: 
+### Set up User-Post relationship in **User.php** model:
+
+-   This was covered around [(8:55)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview)
+
+-   Here is the **User.php** function we added:
 
 ```php
 //User.php
@@ -373,44 +401,69 @@ DB_PASSWORD=rootroot
         return $this->hasMany(Post::class, 'user_id');
     }
 
-//Then use new relationship in UserController.php: 
+//Then use new relationship in UserController.php:
 
 
 ```
+
 -- **This will now return the following:**
 
 ```json
 [
-    {"id":1,"created_at":"2024-01-16T22:28:53.000000Z","updated_at":"2024-01-16T22:28:53.000000Z","title":"My First Post","body":"The sky is blue.","user_id":1},
+    {
+        "id": 1,
+        "created_at": "2024-01-16T22:28:53.000000Z",
+        "updated_at": "2024-01-16T22:28:53.000000Z",
+        "title": "My First Post",
+        "body": "The sky is blue.",
+        "user_id": 1
+    },
 
-    {"id":2,"created_at":"2024-01-16T22:36:22.000000Z","updated_at":"2024-01-16T22:36:22.000000Z","title":"My Second Blog Post","body":"Did you know that 2 + 2 is 4?","user_id":1},
-    
-    {"id":3,"created_at":"2024-01-16T23:52:37.000000Z","updated_at":"2024-01-16T23:52:37.000000Z","title":"My Third Post","body":"This is a test.","user_id":1},
-    
-    {"id":4,"created_at":"2024-01-17T00:03:42.000000Z","updated_at":"2024-01-17T00:03:42.000000Z","title":"Quick Test Post","body":"# My heading\r\n\r\nMake something **bold** or *italics*.","user_id":1}
-    ]
+    {
+        "id": 2,
+        "created_at": "2024-01-16T22:36:22.000000Z",
+        "updated_at": "2024-01-16T22:36:22.000000Z",
+        "title": "My Second Blog Post",
+        "body": "Did you know that 2 + 2 is 4?",
+        "user_id": 1
+    },
+
+    {
+        "id": 3,
+        "created_at": "2024-01-16T23:52:37.000000Z",
+        "updated_at": "2024-01-16T23:52:37.000000Z",
+        "title": "My Third Post",
+        "body": "This is a test.",
+        "user_id": 1
+    },
+
+    {
+        "id": 4,
+        "created_at": "2024-01-17T00:03:42.000000Z",
+        "updated_at": "2024-01-17T00:03:42.000000Z",
+        "title": "Quick Test Post",
+        "body": "# My heading\r\n\r\nMake something **bold** or *italics*.",
+        "user_id": 1
+    }
+]
 ```
 
-
 #### Run Migration To Add Table to Users Table
-- See [(3:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426448#overview)
 
-- To set up the [migration file to add a column to existing table at (3:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426448#overview), run command: 
+-   See [(3:15)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426448#overview)
+
+-   To set up the [migration file to add a column to existing table at (3:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426448#overview), run command:
     `php artisan make:migration add_isadmin_column_to_users_table --table=users`
-
-
-
 
 ---
 
+### Set up a 'Gate' in Laravel
 
-### Set up a 'Gate' in Laravel 
+-   See [tutorial here.](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426458#overview)
 
-- See [tutorial here.](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426458#overview)
+-   Set up route in `web.php`
 
-- Set up route in `web.php`
-
-- In `app/Providers/AuthServiceProvider.php` edit the **boot()** function: 
+-   In `app/Providers/AuthServiceProvider.php` edit the **boot()** function:
 
 ```php
 
@@ -418,19 +471,19 @@ DB_PASSWORD=rootroot
 use Illuminate\Support\Facades\Gate;
 // (3:30) - set up 'Gate': https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34426458#overview
     // public function boot(): void //OUR version had void
-    public function boot() 
+    public function boot()
     {
         //our version missing '$this->registerPolicies();
         $this->registerPolicies();
 
-        //spell out our gate: 
+        //spell out our gate:
         // Gate::define('label', function)
         Gate::define('visitAdminPages', function($user){
             return $user->isAdmin === 1;
         });
     }
 
-//Then in web.php (or controller) use our gate as follows: 
+//Then in web.php (or controller) use our gate as follows:
 Route::get('/admins-only', function(){
     //Set normal controller and functions here.
     if (Gate::allows('visitAdminPages')) {
@@ -442,18 +495,18 @@ Route::get('/admins-only', function(){
 
 ```
 
-
 ### Push Local Laravel to Github
+
 1. **Create Github Repo** - However, do not initialize it with a README or .gitignore at this point.
-2. **Initialize Repo** - In Laravel project directory check if there is a Git repository with 
+2. **Initialize Repo** - In Laravel project directory check if there is a Git repository with
+
     - `git status`
-    - If this fails, not a git repository then initialize one with the ole' 
+    - If this fails, not a git repository then initialize one with the ole'
         - `git init`
 
 3. **Set Remote URL**
 4. **Add changes and commit**
 5. **Push up to the remote**
-
 
 ### Copy Project to another directory
 
@@ -461,19 +514,23 @@ Route::get('/admins-only', function(){
     - `cp -r path/to/myApp path/to/newProject`
 
 ### Copy Project to another directory on another computer
+
 1. Clone the repository
+
     - `git clone https://github.com/your_username/myApp.git`
 
 2. Copy Files to new directory 'newProject'
+
     - `cp -r myApp path/to/newProject`
 
 3. Navigate to 'newProject' Directory
+
     - `cd path/to/newProject`
 
-4. **CHANGE REMOTE URL** - point the 'newProject' to the new clean repo: 
-    `git remote set-url origin https://github.com/your_username/newProjectRepo.git`
+4. **CHANGE REMOTE URL** - point the 'newProject' to the new clean repo:
+   `git remote set-url origin https://github.com/your_username/newProjectRepo.git`
 
-5. Make changes and Push: 
+5. Make changes and Push:
     ```js
     git add .
     git commit -m "Your commit message"
@@ -482,32 +539,43 @@ Route::get('/admins-only', function(){
 6. _There should not be any conflict between the two projects as long as you are working in separate directories ('myApp' and 'newProject'). Each project will have its own Git repository, and changes made in one project will not affect the other._
 
 7. _When you copy files from 'path/to/myApp' to 'path/to/newProject', you are essentially duplicating the project directory. The initialized Git repository (the .git directory) is part of the project structure, and it will be copied along with the files. As a result, the new directory ('newProject') will still be associated with the same Git repository as the original ('myApp')._
+
     - **You can confirm this by checking if the 'newProject' directory contains '.git' directory with this command to attempt to ls the '.git' repository:**
-    - 
+    -
     - `ls path/to/newProject/.git`
+
         ```js
         $ ls ourmainapp/.git
         COMMIT_EDITMSG  config       hooks/  info/  objects/
         HEAD            description  index   logs/  refs/
 
         ```
-    - If no git repository exists, expect a result like: 
+
+    - If no git repository exists, expect a result like:
+
         ```js
         $ ls dent/.git
         ls: cannot access 'dent/.git': No such file or directory
 
         ```
-    - To remove multiple non-empty directories, use: 
+
+    - To remove multiple non-empty directories, use:
         - `rm -r directory1 directory2 directory3`
-    - To remove an empty directory use: 
-        `rmdir directory_name`
+    - To remove an empty directory use:
+      `rmdir directory_name`
     - **(Optional):** _Confirming Deletion_ vs _Force Removal_
         - _If you want to be prompted for confirmation before each removal, you can use the `-i` (interactive) flag:_
-            `rm -ri directory_name`
+          `rm -ri directory_name`
         - _If you want to force removal without any confirmation, you can use the `-f` (force) flag:_
             - `rm -rf directory_name`
     - x
-`
+
+### Summary of Pointing Cloned Repo to a new Repo:
+
+-   ![image of chatgpt directions - 1/18/2024](https://i.imgur.com/DP2AvVo.png)
+    -   local copy in: `/public/images/git_set-cloned-repository-to-a-new-repo_jan-18-2024.png`
+
+---
 
 ---
 
@@ -524,13 +592,13 @@ Route::get('/admins-only', function(){
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   [Simple, fast routing engine](https://laravel.com/docs/routing).
+-   [Powerful dependency injection container](https://laravel.com/docs/container).
+-   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+-   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+-   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+-   [Robust background job processing](https://laravel.com/docs/queues).
+-   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
@@ -548,19 +616,19 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 ### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+-   **[Vehikl](https://vehikl.com/)**
+-   **[Tighten Co.](https://tighten.co)**
+-   **[WebReinvent](https://webreinvent.com/)**
+-   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+-   **[64 Robots](https://64robots.com)**
+-   **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+-   **[Cyber-Duck](https://cyber-duck.co.uk)**
+-   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+-   **[Jump24](https://jump24.co.uk)**
+-   **[Redberry](https://redberry.international/laravel/)**
+-   **[Active Logic](https://activelogic.com)**
+-   **[byte5](https://byte5.de)**
+-   **[OP.GG](https://op.gg)**
 
 ## Contributing
 

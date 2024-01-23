@@ -128,7 +128,14 @@
     - use new **Request::segment(3)** which pertains to each '/' after base domain. 
         - Using our setup, when a tab is active, it **HAS** a _third segment_, ie: `/(1)profile/(2)username/(3)following`
         - 
+- **Video 43** - [Set up relationship in User.php for followers()](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes)
+    - Around 6th minute, test the json returned by calling our `followers()` function set up in `User.php` via the `UserController => followers()` function:
 
+```js
+//The followers of Brad (Barksalot and Meowsalot)
+[{"id":3,"user_id":2,"followeduser":1,"created_at":"2024-01-18T00:39:26.000000Z","updated_at":"2024-01-18T00:39:26.000000Z"},
+{"id":2,"user_id":3,"followeduser":1,"created_at":"2024-01-18T00:34:07.000000Z","updated_at":"2024-01-18T00:34:07.000000Z"}]
+```
 
 
 ### Private functions in Controllers (_in this case, to handle duplicate code_)
@@ -297,16 +304,21 @@ DB_PASSWORD=rootroot
 3. Run the migrate command from terminal in project directory to create the default tables laravel has created for us: 
     - `php artisan migrate`
 
+
+4. Recap Creating a local MySQL database at [Video 18. (6:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34182370#overview)
+    - Recap of the laravel migrations at [Video 20. (~6:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34197742#overview)
+    - x
+
 ---
 
 
 ## Set up Notes (Posts) Database 
-- Started [(9:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
+- Started [Video 25. (9:30)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview)
 
 - Set up migration file for posts db with command: 
     - `php artisan make:migration create_posts_table`
 
-    - See around [(13:00)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview) to see how the migration file was set up between `users` and `posts`
+    - See around [Video 25. (13:00)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351476#overview) to see how the migration file was set up between `users` and `posts`
 
     - Run the migration file with: 
         - `php artisan migrate`
@@ -331,7 +343,7 @@ DB_PASSWORD=rootroot
 
 
 ### Set up foreign key relationship in **Post.php** model to User
-- See [(1:20)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351482#overview)
+- See [Video 27. (1:20)](https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351482#overview)
 
 - Add the relationship b/t Post and User (`belongsTo`) in **Post.php**
 
@@ -445,7 +457,7 @@ Route::get('/admins-only', function(){
 
 ### Copy Project to another directory
 
-1. Copy files Locally
+1. Copy files Locally (do not manually create the new desired directory, specify in command `newProject`)
     - `cp -r path/to/myApp path/to/newProject`
 
 ### Copy Project to another directory on another computer

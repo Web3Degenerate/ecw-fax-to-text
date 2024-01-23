@@ -116,7 +116,10 @@ class UserController extends Controller
             'currentlyFollowing' => $currentlyFollowing,
             'username' => $user->username,
             // 'posts' => $pizza->posts()->latest()->get(),
-            'postCount' => $user->posts()->count()
+            'postCount' => $user->posts()->count(),
+            //(V43. (14:15)) - Add follower and following count: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes
+            'followerCount' => $user->followers()->count(),
+            'followingCount' => $user->followingTheseUsers()->count()
         ]);
     }
 
@@ -155,7 +158,11 @@ class UserController extends Controller
             'username' => $pizza->username,
             // 'posts' => $pizza->posts()->latest()->get(),
             // 'postCount' => $user->posts()->count()
-            'postCount' => $pizza->posts()->count()
+            'postCount' => $pizza->posts()->count(),
+
+            //(V43. (14:15)) - Add follower and following count: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes
+            'followerCount' => $pizza->followers()->count(),
+            'followingCount' => $pizza->followingTheseUsers()->count()
         ]);
         
         return view('profile-posts', 
@@ -184,7 +191,10 @@ class UserController extends Controller
             // 'currentlyFollowing' => $currentlyFollowing,
             // 'username' => $user->username,
             // 'postCount' => $user->posts()->count(),
-            'posts' => $user->posts()->latest()->get()
+
+            //(V43. (12:30) - Updated with new User - Follow table relationship in User.php: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes
+            // 'posts' => $user->posts()->latest()->get()
+            'following' => $user->followingTheseUsers()->latest()->get()
         ]);
     }
 
@@ -198,12 +208,17 @@ class UserController extends Controller
         
         $this->getSharedData($user);
 
+        //debugging, view full json on route: (V43. 5:50)
+        // return $user->followers()->latest()->get();
+
         return view('profile-followers', 
         [
             // 'currentlyFollowing' => $currentlyFollowing,
             // 'username' => $user->username,
             // 'postCount' => $user->posts()->count(),
-            'posts' => $user->posts()->latest()->get()
+        // (Video 43: 5:20) use new relationship in User.php: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503228#notes
+            // 'posts' => $user->posts()->latest()->get()
+            'followers' => $user->followers()->latest()->get()
         ]);
     }
  

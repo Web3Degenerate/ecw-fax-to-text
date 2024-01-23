@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->string('title');
             $table->longText('body');
+            // $table->integer('clinic_time');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
         });
     }

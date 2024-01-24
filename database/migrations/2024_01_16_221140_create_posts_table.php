@@ -9,6 +9,9 @@ return new class extends Migration
     /**
      * Run the migrations.
      * Types available: https://laravel.com/docs/5.6/migrations#creating-columns
+     * base 64 pdf link is about 40,400 characters. 
+     * Both TEXT and VARCHAR (string) have max character limit of 65,535. VARCHAR can be indexed: https://stackoverflow.com/questions/25300821/difference-between-varchar-and-text-in-mysql
+     * mediumText = 16 million characters. longText = 4.2 Billion characters (4GB).
      */
     public function up(): void
     {
@@ -27,6 +30,8 @@ return new class extends Migration
             $table->string('note_provider')->nullable(); // Ham, Kim or Hm, Kim etc.
             $table->boolean('billing_status')->default(0); // 0 for billing eligible, 1 or already billed? 
             $table->string('billing_number')->nullable(); // identifier for billing group? 000008
+            $table->string('fax_image_link')->nullable(); // stores base64 link to fax pdf image.
+            $table->string('fax_details_id')->nullable(); // Fax Details ID: 1241330300
             $table->string('patient_name')->nullable(); // ZZtest, Vern
             $table->string('patient_dob')->nullable();  // 01/01/1963
             $table->string('patient_mrn')->nullable();  // 614171

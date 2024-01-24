@@ -33,11 +33,19 @@ use App\Http\Controllers\FollowController;
 Route::get('/', [UserController::class, 'showCorrectHomepage'])->name('login');
 
 // Route::get('/about', [ExampleController::class, 'aboutPage']);
-//Register user route: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207604#content
-Route::post('/register', [UserController::class, 'register'])->middleware('guest');
 
-// &&& #DCT &&& #############################################################################################################
-Route::get('/enroll', [UserController::class, 'showEnrollForm'])->name('login');
+
+
+// &&& #DCT &&&  Remove the ->name('login') limitation for testing the /enroll route: ##################################################################################
+// Route::get('/enroll', [UserController::class, 'showEnrollForm'])->name('login');
+Route::get('/enroll', [UserController::class, 'showEnrollForm']);
+
+//Register user route: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207604#content
+// Route::post('/register', [UserController::class, 'register'])->middleware('guest');
+// &&& #DCT &&& - to start testing, allow anyone 'guest' or 'auth' to access the register user route:
+Route::post('/register', [UserController::class, 'register']);
+
+
 
 //Add login route: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207654#overview
 Route::post('/login', [UserController::class, 'login'])->middleware('guest');

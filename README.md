@@ -568,12 +568,47 @@ Route::get('/admins-only', function(){
           `rm -ri directory_name`
         - _If you want to force removal without any confirmation, you can use the `-f` (force) flag:_
             - `rm -rf directory_name`
-    - x
+    - To [confirm your remote repository URL](https://intellipaat.com/community/3102/git-show-remote-url-how-can-i-determine-the-url-that-a-local-git-repository-was-originally-cloned-from) use this command:
+        - `git remote`
+            - _returns `origin`_
+        - `git remote show origin`
+            - _returns https://github.com/<username>/<repository-name>_
 
 ### Summary of Pointing Cloned Repo to a new Repo:
 
 -   ![image of chatgpt directions - 1/18/2024](https://i.imgur.com/DP2AvVo.png)
+
     -   local copy in: `/public/images/git_set-cloned-repository-to-a-new-repo_jan-18-2024.png`
+
+-   After cloning repo, running dependencies:
+
+    1. Install **Composer Dependencies**
+
+        - _Laravel projects use Composer for dependency management. Run the following command to install the required dependencies:_
+
+            - `composer install`
+
+        -   - _This command reads the `composer.json` file and installs the dependencies specified in it._
+
+    2. Install NPM Dependencies:
+
+        - _If the project uses frontend dependencies managed by NPM (Node Package Manager), you should run_
+        - `npm install`
+
+    3. **Generate the application key**. Must do this or else you get _'Your app Key is Missing'_ error when you serve up locally.
+
+        - `php artisan key:generate`
+
+        - Set up `.env` file
+
+            - `cp .env.example .env`
+
+        - _Run migrations and perhaps Seed the DB_
+            - `php artisan migrate`
+            - `php artisan db:seed`
+        - _Link Storage?_
+            - _If your project involves file uploads or uses the `storage` directory, you may need to create a symbolic link_
+                - `php artisan storage:link`
 
 ---
 

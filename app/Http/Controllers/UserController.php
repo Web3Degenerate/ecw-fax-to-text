@@ -16,13 +16,17 @@ class UserController extends Controller
         //Check if current user is logged in with globally available 'auth()'
         // auth()->check() //true or false if logged in
         if (auth()->check()) {
-            return view('homepage-feed');
+            $hardCodedMessage = '';
+
+            $users = User::all();
+            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users]);
             // return 'you are logged in'; 
         } else {
             // return view('homepage');
             $ourName = 'Guest';
             $animals = ['Meowsalot', 'Barksalot', 'Purrsloud'];
-            return view('homepage', ['allAnimals' => $animals, 'name' => $ourName, 'catname' => 'Meowsalot']);
+            $hardCodedMessage = '';
+            return view('homepage', ['allAnimals' => $animals, 'name' => $ourName, 'catname' => 'Meowsalot', 'guestMessage' => $hardCodedMessage]);
         }
     }
 
@@ -30,10 +34,15 @@ class UserController extends Controller
     public function showEnrollForm(){
         //Logged in user can register another user:
             if (auth()->check()) {
-                return view('homepage-enroll');
+                $hardCodedMessage = '';
+                return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
             } else {
-        // redirect back to GUEST homepage:
+        // redirect back to GUEST homepage: (let guest create the first user)
+                $hardCodedMessage = 'Go ahead and register as a guest.';
+                return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
+                return view('homepage-enroll')->with('failure', 'Go ahead and register as guest...');
                 return redirect('/')->with('failure', 'You do not have the permissions to create a patient account.');
+
             }  
     }
 
@@ -98,29 +107,70 @@ class UserController extends Controller
     public function register(Request $request){
         $incomingFields = $request->validate([
             // 'username' => 'required', //updated to array in https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#content
+            //&&& #DCT NEW FIELDS &&&
+            'name' => ['required'],
+            'isAdmin' => ['required'],
+            'dob' => ['required'],
+            'referring_provider' => ['required', Rule::in([1, 2, 3, 999])], // Add Rule::in rule for the 'provider' field
             'username' => ['required', 'min:3', 'max:20', Rule::unique('users', 'username')],
             'email' => ['required', 'email', Rule::unique('users', 'email')],
             'password' => ['required', 'min:8', 'confirmed'],
-            //&&& #DCT NEW FIELDS &&&
-            'name' => ['required'],
-            'mrn' => ['required', Rule::unique('users', 'mrn')],
-            'dob' => ['required'],
+            // 'mrn' => ['required', Rule::unique('users', 'mrn')],
             // 'provider' => ['required'],
-            'provider' => ['required', Rule::in([1, 2, 3])], // Add Rule::in rule for the 'provider' field
         ]);
+
+        // $incomingFields['password'] = bcrypt($incomingFields['password']);
 
         // (7:30) - encrypt password before saving to DB: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview
         //look inside associative array
-        $incomingFields['password'] = bcrypt($incomingFields['password']);
+
+//JUST GO F'ING OLD SCHOOL
+        $user = new User;
+
+        $user->name = $request->input('name'); 
+        $user->isAdmin = $request->input('isAdmin'); 
+        $user->dob = $request->input('dob'); 
+        $user->referring_provider = $request->input('referring_provider'); 
+        $user->username = $request->input('username'); 
+        $user->email = $request->input('email'); 
+            $getPassword = $request->input('password');
+        $user->password = bcrypt($getPassword);
+
+        $user->save();   
+
+
+                    // $incomingFields['name'] = $request->input('name');
+                    // $incomingFields['isAdmin'] = $request->input('isAdmin');
+                    // $incomingFields['dob'] = $request->input('dob');
+                    // $incomingFields['referring_provider'] = $request->input('referring_provider');
+        
+        // $incomingFields['password'] = bcrypt($incomingFields['password']);
+
         // User::create($incomingFields); //creates new user in DB 
-        $user = User::create($incomingFields); //creates new user && save to local variable 
+// $user = User::create($incomingFields); //creates new user && save to local variable 
         
         // (16:50): Log in newly registered user: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview
-        auth()->login($user); //sends along cookie session so user logged in
+//&&& #DCT &&& - skip logging in newly created user:
+// auth()->login($user); //sends along cookie session so user logged in
         
         // return 'Connection to UserController success';
         // (16:15) - return redirect to '/' with success message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207658#overview
-        return redirect('/')->with('success', 'Thank you for creating an account');
+
+//&&& #DCT &&& - redirect back to the register/enroll page after creating a new patient user:
+// return redirect('/')->with('success', 'Thank you for creating an account');
+        $displayPatientName = $user->name;
+        $displayPatientMRN = $user->username;
+        $hardCodedMessage = 'You may enroll another patient with the form below.';
+
+        
+// Success message worked, hardCodedMessage did not ($guestMessage):
+        // return back()->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program.', ['guestMessage' => $hardCodedMessage]);
+        return back()->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program.');
+    
+        //Success message failed, hardCodedMessage worked:        
+        return view('homepage-enroll', ['guestMessage' => $hardCodedMessage])->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program.');
+//Type Error: "http://symfony/Component/HttpFoundation/RedirectResponse::__construct():%20Argument%20#2%20($status)%20must%20be%20of%20type%20int,%20array%20given,"        
+        return redirect('/enroll', ['guestMessage' => $hardCodedMessage])->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program.');
     }
 
 

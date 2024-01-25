@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Follow;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\View;
@@ -19,7 +20,8 @@ class UserController extends Controller
             $hardCodedMessage = '';
 
             $users = User::all();
-            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users]);
+            $patients = Patient::all();
+            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients]);
             // return 'you are logged in'; 
         } else {
             // return view('homepage');

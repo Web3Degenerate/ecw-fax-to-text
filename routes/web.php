@@ -133,3 +133,20 @@ Route::post('/manually-get-fax-update', [NoteController::class, 'manuallyGetFaxU
 
 // &&& #DCT &&& - Manually create a new PATIENT in the patient table
 Route::post('/register-new-online-digitial-em-patient', [PatientController::class, 'manuallyRegisterNewPatient']);
+
+// &&& #DCT &&& - view patient Dashboard
+// Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
+Route::get('/hub/{patient:mrn}', [PatientController::class, 'viewPatient']);
+
+// &&& #DCT &&& - #ToDo - Add edit page and route: 
+Route::get('/edit-patient/{patient:mrn}', [PatientController::class, 'editPatient']);
+
+
+// ****************************** PATIENT HUB RELATED ROUTES (BORROWED FROM "PROFILE RELATED ROUTES" ********************************************//
+
+// START WITH JUST THE 'Profile' page for patient which we are calling 'hub'
+Route::get('/profile/{patient:mrn}', [PatientController::class, 'getHub']); //old UserController@profile()hub
+
+// (7:25) - Set up routes for 'following' and 'follwer' tabs: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview
+Route::get('/hub/{patient:mrn}/billing', [UserController::class, 'getHubBilling']);
+Route::get('/hub/{patient:mrn}/edit', [UserController::class, 'getHubEdit']);

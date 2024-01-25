@@ -73,24 +73,26 @@
                             
                             <h4 class="text-center">Manually Add A New Pt</h4> 
                             
-                            <div class="form-group">
-                              <label for="set-pt-name" class="text-muted mb-1"><small>Enter Patient Name</small></label>
-                              <input value="{{old('patient_name')}}" name="patient_name" id="set-pt-name" class="form-control" type="text" placeholder="Last Name, First Name" autocomplete="off" />                           
-                            </div>
-
-                            <div class="form-group">
-                              <div class="col-xs-2">
+                        <div class="form-group row p-1 text-center">
+                                <div class="col-xs-4 p-2">
+                                  <label for="set-pt-name" class="text-muted mb-1"><small>Enter Patient Name</small></label>
+                                  <input value="{{old('name')}}" name="name" id="set-pt-name" class="form-control" type="text" placeholder="Last Name, First Name" autocomplete="off" />                           
+                                </div>
+                           
+                              <div class="col-xs-2 p-2">
                                   <label for="set-pt-mrn" class="text-muted mb-1"><small>Enter Pt MRN</small></label>
                                   <input value="{{old('mrn')}}" name="mrn" id="set-pt-mrn" class="form-control" type="text" placeholder="'000000'" autocomplete="off" />                           
                               </div>
-                            </div>
 
-                            <div class="form-group">
-                              <div class="col-xs-4">
+
+                              <div class="col-xs-4 p-2">
                                   <label for="set-referring_provider" class="text-muted mb-1"><small>Pt Referring Provider</small></label>
                                   <input value="{{old('referring_provider')}}" name="referring_provider" id="set-referring_provider" class="form-control" type="text" placeholder="Last Name, First" autocomplete="off" />                           
                               </div>
-                            </div>
+                        </div>
+
+                            {{-- <div class="form-group row ">
+                            </div> --}}
 
                             {{-- <input type="hidden" id="custId" name="custId" value="3487"> --}}
                           <div class="text-center">
@@ -104,12 +106,12 @@
 <hr>
     <div class="profile-slot-content">
           <div class="list-group">
-            @foreach($users as $user)
-                @if($user->isAdmin == 0)
-                    <a href="/profile/{{ $user->username }}" class="list-group-item list-group-item-action">
+            @foreach($patients as $patient)
+                @if($patient->status == 0)
+                    <a href="/profile/{{ $patient->mrn }}" class="list-group-item list-group-item-action">
                         <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
                         {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
-                        <strong>{{ $user->name }} ({{ $user->username }})</strong> has XX total minutes. 
+                        <strong>{{ $patient->name }} ({{ $patient->mrn }})</strong> has XX total minutes. 
                     </a>
                 @endif
             @endforeach
@@ -118,3 +120,4 @@
     </div>
   </div>
 </x-layout>
+

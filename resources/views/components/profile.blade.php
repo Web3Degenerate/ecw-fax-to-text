@@ -15,7 +15,7 @@
           {{-- <img class="avatar-small" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128" /> {{ ucwords($sharedData['username']) }} --}}
           <img class="avatar-small" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> {{ ucwords($sharedData['username']) }}
 
-          
+           
 {{-- (3:40) - Add (at)auth wrapper around form--}}
       @auth
           {{-- SHOW FOLLOW BUTTON: NOT following AND not your OWN account: --}}

@@ -7,6 +7,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowController;
 // use App\Http\Controllers\ExampleController;
 
+//&&& #DCT &&& - Added Note and Patient Controllers
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\PatientController;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -71,8 +76,8 @@ Route::post('/remove-follow/{user:username}', [FollowController::class, 'removeF
         // Route:: get('/create-post', [PostController::class, 'showCreateForm'])->middleware('auth');
         // Route:: post('/create-post', [PostController::class, 'storeNewPost'])->middleware('auth');
 //(13:25) Now try replacing 'middleware('auth')' with our custom 'middleware(mustBeLoggedIn)': https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400816#overview
-Route:: get('/create-post', [PostController::class, 'showCreateForm'])->middleware('mustBeLoggedIn');
-Route:: post('/create-post', [PostController::class, 'storeNewPost'])->middleware('mustBeLoggedIn');
+Route::get('/create-post', [PostController::class, 'showCreateForm'])->middleware('mustBeLoggedIn');
+Route::post('/create-post', [PostController::class, 'storeNewPost'])->middleware('mustBeLoggedIn');
 
 //Other middleware combo of 'guest' with name of 'home'
 
@@ -121,3 +126,10 @@ Route::get('/admins-controller-only', function(){
 Route::get('/admins-only', function(){
     return 'Middleware Way to Enforce: Only admins should be able to see this page.';
 })->middleware('can:visitAdminPages');
+
+
+// &&& #DCT &&& - Manual check for new faxes
+Route::post('/manually-get-fax-update', [NoteController::class, 'manuallyGetFaxUpdate']);
+
+// &&& #DCT &&& - Manually create a new PATIENT in the patient table
+Route::post('/register-new-online-digitial-em-patient', [PatientController::class, 'manuallyRegisterNewPatient']);

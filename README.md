@@ -569,10 +569,14 @@ Route::get('/admins-only', function(){
         - _If you want to force removal without any confirmation, you can use the `-f` (force) flag:_
             - `rm -rf directory_name`
     - To [confirm your remote repository URL](https://intellipaat.com/community/3102/git-show-remote-url-how-can-i-determine-the-url-that-a-local-git-repository-was-originally-cloned-from) use this command:
+
         - `git remote`
             - _returns `origin`_
         - `git remote show origin`
             - _returns https://github.com/<username>/<repository-name>_
+
+    - [**See git remote Docs**](https://git-scm.com/docs/git-remote) (_for things like, `git remote set-url`, `prune`, etc_)
+    - x
 
 ### Summary of Pointing Cloned Repo to a new Repo:
 

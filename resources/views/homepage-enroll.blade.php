@@ -92,7 +92,7 @@
 
                         <div class="form-group">
                               <label for="username-register" class="text-muted mb-1"><small>MRN</small></label>
-                              <input value="{{old('username')}}" name="username" id="username-register" class="form-control" type="text" placeholder="Enter Patient&rsquo;s MRN" autocomplete="off" />
+                              <input value="{{old('username')}}" name="username" id="username-register" class="form-control" type="text" placeholder="(this is just username)_Enter Patient&rsquo;s MRN" autocomplete="off" />
                             {{-- (11:50) Added error message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview --}}
                               @error('username')
                                 <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>

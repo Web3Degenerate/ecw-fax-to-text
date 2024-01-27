@@ -14,7 +14,7 @@ class Post extends Model
 
     protected $fillable = ['title', 'body', 'user_id'];
 
-    //(1:40) - Set relationship to User: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351482#overview
+    //(Video 27: 1:40) - Set relationship to User: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34351482#overview
     // public function user(){
     public function pizza(){
         //this is Post object as a whole

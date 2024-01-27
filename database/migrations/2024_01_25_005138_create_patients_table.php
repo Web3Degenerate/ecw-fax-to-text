@@ -21,6 +21,9 @@ return new class extends Migration
             $table->date('billing_index_end_date')->nullable(); // 1/10/2024 || 1/31/2024 to 2/6/2024
             $table->string('billing_index_start_number')->nullable();  // 31 - convert to # day in year 31 to 37th day of year (2/6/24)
             $table->string('billing_index_end_number')->nullable();    // 37
+//Added time on user on HP Elitebook 15' - (R 1/25/2024) ~4pm
+//If desired, run separate migration on patient table on other machines for 'clinic_time_counter'
+            $table->string('clinic_time_counter')->nullable(); //quick & dirty time counter.
             $table->string('unique_days')->nullable();      // 0 - 7
             $table->boolean('status')->default(0); // 0 active, 1 for disenrolled?
             $table->timestamps();

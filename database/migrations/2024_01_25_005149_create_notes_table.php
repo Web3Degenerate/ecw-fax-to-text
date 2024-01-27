@@ -30,8 +30,14 @@ return new class extends Migration
         // ERROR MESSAGE:    
             // $table->foreignId('mrn')->constrained('patients', 'mrn')->onDelete('cascade');
         // SQLSTATE[HY000]: General error: 3780 Referencing column 'patient_mrn' and referenced column 'mrn' in foreign key constraint 'notes_patient_mrn_foreign' are incompatible. (Connection: mysql, SQL: alter table `notes` add constraint `notes_patient_mrn_foreign` foreign key (`patient_mrn`) references `patients` (`mrn`) on delete cascade) 
-                      
-            $table->foreignId('mrn')->constrained('patients', 'mrn')->onDelete('cascade');
+        
+// LAST ATTEMPT ON Wed 1/24/2024 was as shown below. This created the notes table with a patient_id field but no foregin key was set up in the MySQL database
+            // $table->foreignId('mrn')->constrained('patients', 'mrn')->onDelete('cascade');
+
+// HP Elitebook 15' migration on R 1/25/2024, we decided to just run the standard foregin key to patients table on 'id'
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
+    // As backup also directly store the pt MRN in the Notes table:        
+            $table->string('pt_mrn')->nullable();  // 614171
 
             $table->string('fax_file_name')->nullable(); // Fax File Name: 20240119102015-309406-67411 || Fax Details ID: 1241330300
             $table->string('fax_details_id')->nullable(); // Fax Details ID: 1241330300
@@ -60,7 +66,6 @@ return new class extends Migration
             $table->string('patient_name')->nullable(); // ZZtest, Vern
             $table->string('patient_dob')->nullable();  // 01/01/1963
     //Error: Column already exists: 1060 Duplicate column name 'patient_mrn'
-            $table->string('patient_account_number')->nullable();  // 614171
             $table->timestamps();
         });
     }

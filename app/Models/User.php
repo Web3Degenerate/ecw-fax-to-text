@@ -47,7 +47,7 @@ class User extends Authenticatable
     ];
 
 
-// Added (~9:38) - https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview
+// Added (Video 30: 9:20) - https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview
     public function posts() {
         //A user Has MANY posts:
         // hasMany(target class, column powering this relationship)

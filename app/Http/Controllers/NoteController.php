@@ -149,6 +149,7 @@ class NoteController extends Controller
 
 
 
+ //break up function   
     public function checkFaxInbox(Request $request) {
 
         $check_srfax_inbox = $this->getFaxInbox();

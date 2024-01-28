@@ -149,6 +149,40 @@ class NoteController extends Controller
 
 
 
+    public function checkFaxInbox(Request $request) {
+
+        $check_srfax_inbox = $this->getFaxInbox();
+                $response = file_get_contents($check_srfax_inbox);
+                $result_get_fax_inbox = json_decode($response, true);
+        
+           // Pull out the array results
+                    if ($result_get_fax_inbox && isset($result_get_fax_inbox['Result'])) {
+                        $faxData = $result_get_fax_inbox['Result'];
+                    // **** GOOD UP TO $faxData ************************************************************* //
+
+                            // foreach ($faxData as $fax) {
+                    
+                            //     // Extract sFaxDetailsID from FileName
+                            //         $fileNameParts = explode('|', $fax['FileName']);
+                            //     $sFaxDetailsID = isset($fileNameParts[1]) ? $fileNameParts[1] : '';
+                            //     $sFaxFileName = isset($fileNameParts[0]) ? $fileNameParts[0] : '';
+                                
+                            //     // Pull the Date Fax was Sent??
+                            //             // echo urlencode($fax['Date']);
+                            //             // echo 'Date: ' . $fax['Date'];
+                            //     $date_fax_sent = $fax['Date'];       
+                            //     $fax_status = $fax['ReceiveStatus'];
+                            // }
+
+                    } else {
+                        $faxData = '';
+                    }
+            return view('fax-inbox', ['faxData' => $faxData]);
+    } 
+
+
+// ***************************************** manuallyGetFaxUpdate() combined function test ********************* //
+
     public function manuallyGetFaxUpdate(Request $request){
 
         $check_srfax_inbox = $this->getFaxInbox();
@@ -197,7 +231,6 @@ class NoteController extends Controller
             
                                                 $pdfDataUrl = json_encode($dataUrlPdfData);
                                                               
-
 
 // ************************************* Extract string values from $pdfDataUrl ***************
                                                 $mrn_matches = [];

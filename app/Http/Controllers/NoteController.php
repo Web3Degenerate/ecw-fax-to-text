@@ -149,7 +149,7 @@ class NoteController extends Controller
 
 
 
- //break up function   
+ // check fax inbox:   
     public function checkFaxInbox(Request $request) {
 
         $check_srfax_inbox = $this->getFaxInbox();
@@ -180,6 +180,22 @@ class NoteController extends Controller
                     }
             return view('fax-inbox', ['faxData' => $faxData]);
     } 
+
+
+    public function retrieveSingleFax($sFaxDetailsID){
+        
+        $check_retrieve_fax = $this->retrieveFax($sFaxDetailsID);
+                                                
+        $retrieveFaxResponse = file_get_contents($check_retrieve_fax);
+        $decodedResult = json_decode($retrieveFaxResponse, true);
+        $pdfData = $decodedResult['Result'];
+
+        $dataUrlPdfData = 'data:application/pdf;base64,' . $pdfData;
+
+        $pdfDataUrl = json_encode($dataUrlPdfData);
+
+        return view('single-fax-view', ['pdfDataUrl' => $pdfDataUrl]);
+    }
 
 
 // ***************************************** manuallyGetFaxUpdate() combined function test ********************* //

@@ -51,16 +51,24 @@ class NoteController extends Controller
 
 
 
-    private function getFaxInbox(){
+    public function getFaxInbox(){
             // Dynamically set $sEndDate to current day (in EST) and set $sStartDate will be 14 prior to $sEndDate. 
             date_default_timezone_set('America/New_York'); // Set the timezone to Eastern Time
         
-            // Get the current date in 'YYYYMMDD' format
-                $currentDate = (new DateTime())->format('Ymd');
-                $sEndDate = $currentDate;
+            // // Get the current date in 'YYYYMMDD' format
+            //     $currentDate = (new DateTime())->format('Ymd');
+            //     $sEndDate = $currentDate;
             
-            // Go back 14 days from the current date
-                $startDateObj = (new DateTime())->modify('-14 day');
+            // // Go back 14 days from the current date
+            //     $startDateObj = (new DateTime())->modify('-14 day');
+            //     $sStartDate = $startDateObj->format('Ymd');
+
+            // Get the current date in 'YYYYMMDD' format
+                $currentDate = Carbon::now()->format('Ymd');
+                $sEndDate = $currentDate;
+
+                // Go back 14 days from the current date
+                $startDateObj = Carbon::now()->subDays(14);
                 $sStartDate = $startDateObj->format('Ymd');
             
               $postVariables = array(
@@ -91,14 +99,28 @@ class NoteController extends Controller
             $result = curl_exec($ch);
                  
                 if (curl_errno($ch)) {
-                    echo 'Error – ' . curl_error($ch);
-                    // $log_for_get_fax_inbox = 'Error – ' . curl_error($ch);
-                    // exit;
+                    // echo 'Error – ' . curl_error($ch);
+                        // $log_for_get_fax_inbox = 'Error – ' . curl_error($ch);
+                        // exit;
+                    return 'Error – ' . curl_error($ch);
                 }
                 else {
-                 echo $result;
-                //  return $result;
+                //  echo $result;
+                 return $result;
                     // $log_for_get_fax_inbox = 'Success! 1 or more faxes found.';
+
+                            // $response = file_get_contents($result);
+                            // $result_get_fax_inbox = json_decode($response, true);
+                
+                            // // Pull out the array results
+                            // if ($result_get_fax_inbox && isset($result_get_fax_inbox['Result'])) {
+                            //     $faxData = $result_get_fax_inbox['Result'];
+                            //     return $faxData;
+                            // } else {
+                            //     $faxData = '';
+                            //     return $faxData;
+                            // }
+                   
                 }
 
                 curl_close($ch);
@@ -138,10 +160,14 @@ class NoteController extends Controller
             if (curl_errno($ch)) {
                 // $log_for_retrieve_fax_result = 'Fax sFaxDetailsID ' . $sFaxDetailsID . ' Error Message:  ' . curl_error($ch);
                 // echo json_encode(["error" => "Error – " . curl_error($ch)]);
-                echo 'Error – ' . curl_error($ch);
+                // echo 'Error – ' . curl_error($ch);
+                return 'Error – ' . curl_error($ch);
+
             } else {  
                 // $log_for_retrieve_fax_result = 'Fax sFaxDetailsID ' . $sFaxDetailsID . ' retrieved! Fax notes added to DB.';
-                echo $result_retrieve_fax;
+                // echo $result_retrieve_fax;
+                return $result_retrieve_fax;
+
             }
             curl_close($ch);
 
@@ -149,52 +175,58 @@ class NoteController extends Controller
 
 
 
- // check fax inbox:   
-    public function checkFaxInbox(Request $request) {
+ // check fax inbox: GET ROUTE  
+    public function checkFaxInbox() {
 
         $check_srfax_inbox = $this->getFaxInbox();
-                $response = file_get_contents($check_srfax_inbox);
-                $result_get_fax_inbox = json_decode($response, true);
+        //         $response = file_get_contents($check_srfax_inbox);
+        //         $result_get_fax_inbox = json_decode($response, true);
         
-           // Pull out the array results
-                    if ($result_get_fax_inbox && isset($result_get_fax_inbox['Result'])) {
-                        $faxData = $result_get_fax_inbox['Result'];
-                    // **** GOOD UP TO $faxData ************************************************************* //
+        //    // Pull out the array results
+        //             if ($result_get_fax_inbox && isset($result_get_fax_inbox['Result'])) {
+        //                 $faxData = $result_get_fax_inbox['Result'];
+        //             // **** GOOD UP TO $faxData ************************************************************* //
 
-                            // foreach ($faxData as $fax) {
+        //                     // foreach ($faxData as $fax) {
                     
-                            //     // Extract sFaxDetailsID from FileName
-                            //         $fileNameParts = explode('|', $fax['FileName']);
-                            //     $sFaxDetailsID = isset($fileNameParts[1]) ? $fileNameParts[1] : '';
-                            //     $sFaxFileName = isset($fileNameParts[0]) ? $fileNameParts[0] : '';
+        //                     //     // Extract sFaxDetailsID from FileName
+        //                     //         $fileNameParts = explode('|', $fax['FileName']);
+        //                     //     $sFaxDetailsID = isset($fileNameParts[1]) ? $fileNameParts[1] : '';
+        //                     //     $sFaxFileName = isset($fileNameParts[0]) ? $fileNameParts[0] : '';
                                 
-                            //     // Pull the Date Fax was Sent??
-                            //             // echo urlencode($fax['Date']);
-                            //             // echo 'Date: ' . $fax['Date'];
-                            //     $date_fax_sent = $fax['Date'];       
-                            //     $fax_status = $fax['ReceiveStatus'];
-                            // }
+        //                     //     // Pull the Date Fax was Sent??
+        //                     //             // echo urlencode($fax['Date']);
+        //                     //             // echo 'Date: ' . $fax['Date'];
+        //                     //     $date_fax_sent = $fax['Date'];       
+        //                     //     $fax_status = $fax['ReceiveStatus'];
+        //                     // }
 
-                    } else {
-                        $faxData = '';
-                    }
-            return view('fax-inbox', ['faxData' => $faxData]);
+        //             } else {
+        //                 $faxData = '';
+        //             }
+
+            // return view('fax-inbox', ['faxData' => $faxData]);
+            return view('fax-inbox', ['faxDataContents' => $check_srfax_inbox]);
+
     } 
 
 
-    public function retrieveSingleFax($sFaxDetailsID){
+    public function retrieveSingleFax($faxid){
+        $sFaxDetailsID = $faxid;
+
         
         $check_retrieve_fax = $this->retrieveFax($sFaxDetailsID);
+        // return view('fax-view-single', ['pdfDataUrl' => $check_retrieve_fax]);
                                                 
-        $retrieveFaxResponse = file_get_contents($check_retrieve_fax);
-        $decodedResult = json_decode($retrieveFaxResponse, true);
+        // $retrieveFaxResponse = file_get_contents($check_retrieve_fax); // don't need file_get_contents in laravel
+        $decodedResult = json_decode($check_retrieve_fax, true);
         $pdfData = $decodedResult['Result'];
 
         $dataUrlPdfData = 'data:application/pdf;base64,' . $pdfData;
 
         $pdfDataUrl = json_encode($dataUrlPdfData);
 
-        return view('single-fax-view', ['pdfDataUrl' => $pdfDataUrl]);
+        return view('fax-view-single', ['pdfDataUrl' => $pdfDataUrl, 'pdfData' => $pdfData]);
     }
 
 

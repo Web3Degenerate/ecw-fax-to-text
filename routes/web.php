@@ -150,3 +150,11 @@ Route::get('/profile/{patient:mrn}', [PatientController::class, 'getHub']); //ol
 // (7:25) - Set up routes for 'following' and 'follwer' tabs: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview
 Route::get('/hub/{patient:mrn}/billing', [UserController::class, 'getHubBilling']);
 Route::get('/hub/{patient:mrn}/edit', [UserController::class, 'getHubEdit']);
+
+
+// **************************** FAX RELATED ROUTES ********************************************* //
+
+// Copy of rxminter/srfax index.php
+Route::get('/fax-inbox', [NoteController::class, 'checkFaxInbox']);
+
+Route::get('/view-single-fax/{faxid}', [NoteController::class, 'retrieveSingleFax']);

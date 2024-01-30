@@ -224,9 +224,9 @@ class NoteController extends Controller
 
         $dataUrlPdfData = 'data:application/pdf;base64,' . $pdfData;
 
-        $pdfDataUrl = json_encode($dataUrlPdfData);
+        // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
 
-        return view('fax-view-single', ['pdfDataUrl' => $pdfDataUrl, 'pdfData' => $pdfData]);
+        return view('fax-view-single', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
     }
 
 

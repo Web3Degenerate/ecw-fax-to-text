@@ -55,18 +55,26 @@
                         $date_fax_sent = $fax['Date'];       
                         $fax_status = $fax['ReceiveStatus'];
                     ?>
-                        <ul>
-                            <li>
-                            <a href="/view-single-fax/{{ $sFaxDetailsID }}" class="list-group-item list-group-item-action">
-                                {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
-                                {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
-                                <strong>{{ $date_fax_sent }} </strong>
-                            </a>
-                            </li>
-                            <li>Fax Details Id: {{ $sFaxDetailsID }}</li>
-                            <li>Fax File Name: {{ $sFaxFileName }}</li>
-                            <li>Fax Status: {{ $fax_status }}</li>
-                        </ul>
+                        <div class="list-group-item list-group-item-action">  
+                            <ul>
+                                <li>
+                                <a href="/manually-enter-single-fax-form/{{ $sFaxDetailsID }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#33ff77">
+                                    {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
+                                    {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
+                                    <strong>Manually Enter Fax On: {{ $date_fax_sent }} </strong>
+                                </a>
+                                </li>
+                                <li>Fax Details Id: {{ $sFaxDetailsID }}</li>
+                                <li>Fax File Name: {{ $sFaxFileName }}</li>
+                                <li>Fax Status: {{ $fax_status }}</li>
+                                <li>
+                                    <a href="/view-single-fax/{{ $sFaxDetailsID }}" class="btn btn-warning btn-sm">
+                                    View {{ $date_fax_sent }} Fax Details 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <hr>
                 @endforeach
 
              

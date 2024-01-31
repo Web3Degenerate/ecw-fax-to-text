@@ -213,8 +213,7 @@ class NoteController extends Controller
 
     public function retrieveSingleFax($faxid){
         $sFaxDetailsID = $faxid;
-
-        
+  
         $check_retrieve_fax = $this->retrieveFax($sFaxDetailsID);
         // return view('fax-view-single', ['pdfDataUrl' => $check_retrieve_fax]);
                                                 
@@ -227,6 +226,23 @@ class NoteController extends Controller
         // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
 
         return view('fax-view-single', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
+    }
+
+    public function retrieveFaxFormForManualEntry($faxid){
+        $sFaxDetailsID = $faxid;
+  
+        $check_retrieve_fax = $this->retrieveFax($sFaxDetailsID);
+        // return view('fax-view-single', ['pdfDataUrl' => $check_retrieve_fax]);
+                                                
+        // $retrieveFaxResponse = file_get_contents($check_retrieve_fax); // don't need file_get_contents in laravel
+        $decodedResult = json_decode($check_retrieve_fax, true);
+        $pdfData = $decodedResult['Result'];
+
+        $dataUrlPdfData = 'data:application/pdf;base64,' . $pdfData;
+
+        // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
+
+        return view('fax-enter-single-form', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
     }
 
 

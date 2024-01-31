@@ -158,3 +158,5 @@ Route::get('/hub/{patient:mrn}/edit', [UserController::class, 'getHubEdit']);
 Route::get('/fax-inbox', [NoteController::class, 'checkFaxInbox']);
 
 Route::get('/view-single-fax/{faxid}', [NoteController::class, 'retrieveSingleFax']);
+
+Route::get('/manually-enter-single-fax-form/{faxid}', [NoteController::class, 'retrieveFaxFormForManualEntry']);

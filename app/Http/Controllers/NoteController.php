@@ -245,6 +245,11 @@ class NoteController extends Controller
         return view('fax-enter-single-form', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
     }
 
+// ************ UPDATE OR CREATE NOTE FROM MANUAL FAX FORM ******************************************//
+    public function createNoteFromManualFaxForm(Request $request){
+        
+    }
+
 
 // ***************************************** manuallyGetFaxUpdate() combined function test ********************* //
 

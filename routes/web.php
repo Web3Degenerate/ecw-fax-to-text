@@ -160,3 +160,5 @@ Route::get('/fax-inbox', [NoteController::class, 'checkFaxInbox']);
 Route::get('/view-single-fax/{faxid}', [NoteController::class, 'retrieveSingleFax']);
 
 Route::get('/manually-enter-single-fax-form/{faxid}', [NoteController::class, 'retrieveFaxFormForManualEntry']);
+
+Route::post('/create-note-from-single-fax-form', [NoteController::class, 'createNoteFromManualFaxForm']);

@@ -29,7 +29,7 @@
                         {{-- <strong>{{ $pdfDataUrl }} </strong> --}}
 
 
-                        <form action="/login" method="POST" class="mb-0 pt-2 pt-md-0" id="registration-form">
+                        <form action="/create-note-from-single-fax-form" method="POST" class="mb-0 pt-2 pt-md-0" id="registration-form">
                             @csrf
 
     {{-- PATIENT NAME --}}
@@ -61,6 +61,17 @@
                             @enderror
                         </div>
 
+    {{-- DOB string --}}
+                        <div class="form-group">
+                            <label for="dob_formatted" class="text-muted mb-1"><small>DOB Formatted</small></label>
+                            <input value="{{old('dob_formatted')}}" name="dob_formatted" id="patient-dob-formatted" class="form-control" type="date" autocomplete="off" />
+                            @error('dob_formatted')
+                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                            @enderror
+                        </div>
+
+                        
+
     {{-- Provider --}}
                         <div class="form-group">
                             <label for="provider" class="text-muted mb-1"><small>Patient Provider:</small></label>
@@ -90,6 +101,17 @@
                               <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
                             @enderror
                         </div>
+
+    {{-- Date Time String --}}
+                        <div class="form-group">
+                            <label for="note_date_time_string_standardized" class="text-muted mb-1"><small>Date Time String (Standardized)</small></label>
+                            <input value="{{old('note_date_time_string_standardized')}}" name="note_date_time_string_standardized" id="patient-dateTime-stamp-string-standardized" class="form-control" type="text" autocomplete="off" />
+                            @error('note_date_time_string_standardized')
+                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                            @enderror
+                        </div>
+
+
 
     {{-- Date Time Formatted as dateTime Object --}}
                         <div class="form-group">
@@ -169,8 +191,10 @@
                 const patientFullName = document.getElementById('patient-name');
                 // patientFullName.innerHTML = `Patient: ${patientName}`;
                 
-                const patientDob = document.getElementById('patient-dob');
-                // patientDob.innerHTML = `DOB: ${dob}`;
+                const patientDobString = document.getElementById('patient-dob');
+                // patientDobString.innerHTML = `DOB: ${dob}`;
+
+                const patientDobFormatted = document.getElementById('patient-dob-formatted');
                                     
                     
                 const patientMrn = document.getElementById('account-number');
@@ -184,6 +208,7 @@
                 
                 // const patientDateTimeStamp = document.getElementById('patient-dateTime-stamp');
                 const patientDateTimeStamp = document.getElementById('patient-dateTime-stamp-string');
+                const patientDateTimeStampStandardized = document.getElementById('patient-dateTime-stamp-string-standardized');
                 const patientDateTimeStampFormatted = document.getElementById('patient-dateTime-stamp-formatted');
                 const patientDateTimeStampIso = document.getElementById('patient-dateTime-stamp-iso');
                 
@@ -238,9 +263,26 @@
                         // DOB            
                                     const dobMatch = text.match(/DOB:\s*(\d{2}\/\d{2}\/\d{4})/);
                                     const dob = dobMatch ? dobMatch[1] : 'Not Found';
-                                    // patientDob.innerHTML = `DOB: ${dob}`;
-                                    patientDob.value = `${dob}`;
-                           
+                                    console.log('original dob es', dob)
+                                    // patientDobString.innerHTML = `DOB: ${dob}`;
+                                    patientDobString.value = `${dob}`;
+                                    console.log('final dob es', patientDobString.value)
+
+                        // DOB formatted:
+                                    // Split the DOB string into an array [MM, DD, YYYY]
+                                    // const dobArray = dob != 'Not Found' ? dob.split('/') : '01/01/1011';
+                                    if(dobMatch){
+                                        const dobArray = dob.split('/');
+
+                                    // Create a new Date object with the parts of the DOB
+    // Try feeding the date input with a string in the format of YYYY-MM-DD for the dob as date in the DB:
+    // const dobDateObject = new Date(`${dobArray[2]}-${dobArray[0]}-${dobArray[1]}`);
+                                        const dobDateObject = `${dobArray[2]}-${dobArray[0]}-${dobArray[1]}`;
+                                        patientDobFormatted.value = `${dobDateObject}`;
+                                        console.log("patientDobFormatted is ", dobDateObject)
+                                    }else{
+                                        patientDobFormatted.value = '0911-09-11';
+                                    }
                         // Referring Provider: 
                                     const patientProviderPattern = /Action Taken[^]*?(\b[A-Z][a-z]+,\s[A-Z][a-z]+\b)[^]*?\d{2}\/\d{2}\/\d{4}\s?\d{2}:\d{2}:\d{2}\s[APMapm]{2}>/;
         
@@ -251,7 +293,10 @@
 
                                     console.log("Patient Provider: ", displayPatientProvider);
                                 
-                          
+ // ********* DATE TIME STAMP AS STRING ************************************************************************************************************* //
+ 
+        // **** DATE TIME STAMP AS RAW STRING (with or without space) **** //
+
                         // dateTime stamp (patientDateTimeStamp)
                                     // const dateTimeStampPattern = /Action Taken [^]*?(\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2} [APMapm]{2})\s?>/;
                         // Modified dateTime (no space)
@@ -263,11 +308,61 @@
                                     // patientDateTimeStamp.innerHTML = `Note Created At: ${displayPatientDateTimeStamp}`;
                                     patientDateTimeStamp.value = `${displayPatientDateTimeStamp}`;
                                     
-                                        console.log('Patient DateTime Stamp:', displayPatientDateTimeStamp);                         
-                                
-                                 
+                                        console.log('Patient DateTime Stamp (core) "displayPatientDateTimeStamp" ==> ', displayPatientDateTimeStamp);                         
+        // **** DATE TIME STAMP STANDARDIZED - (always with space) **** //
+            //raw version: displayPatientDateTimeStamp
+
+                    //                 if(dateTimeStampMatch){
+                    //                     // Regular expression to match date and time parts
+                    //                     const dateTimeStampStandardizedPattern = /(\d{2}\/\d{2}\/\d{4})(?:\s?(\d{2}:\d{2}:\d{2} [APMapm]{2}))?/;
+
+                    //                     // Match the date and time parts
+                    //                     const dateTimeStampStandardizedMatch = displayPatientDateTimeStamp.match(dateTimeStampStandardizedPattern);
+
+                    // // ******* INNER STANDARDIZE STRING DATE TIME IF STATEMENT ************************ //
+                    //                     if (dateTimeStampStandardizedMatch) {
+                    //                         // If there is no space between date and time, add a space
+                    //                         if (!dateTimeStampStandardizedMatch[2] || dateTimeStampStandardizedMatch[2].length === 0) {
+                    //                             const formattedDateTimeStamp = `${dateTimeStampStandardizedMatch[1]} ${dateTimeStampStandardizedMatch[2] || ''}`.trim();
+                    //                             console.log('Formatted DateTime Stamp:', formattedDateTimeStamp);
+                    //                             patientDateTimeStampStandardized.value = `${formattedDateTimeStamp}`;
+                    //                         } else {
+                    //                             console.log('ALREADY CORRECT DateTime Stamp as is:', displayPatientDateTimeStamp);
+                    //                             patientDateTimeStampStandardized.value = `${displayPatientDateTimeStamp}`;
+                    //                         }
+                    //                         } else {
+                    //                         console.log('Invalid DateTime Stamp Format');
+                    //                         patientDateTimeStampStandardized.value = `Error: DateTime Stamp Not Found. Error-Code-407b`;
+                    //                         }
+                                        
+                    //                 }
+
+
+
+
+                    // ******************** ChatGPT model: 
+                    function ensureSpaceInDateTimeFormat(dateTimeString) {
+                        const pattern = /^(\d{2}\/\d{2}\/\d{4})(\s?\d{2}:\d{2}:\d{2} [APMapm]{2})$/;
+
+                        const match = dateTimeString.match(pattern);
+
+                        if (match) {
+                            const [_, datePart, timePart] = match; // Extract matched groups
+
+                            // If there is no space between date and time, add a space
+                            const correctedDateTimeString = `${datePart}${timePart ? ' ' + timePart : ''}`;
+
+                            return correctedDateTimeString;
+                        }
+
+                        return null; // Return null for an invalid format
+                    }
+
+                    const standarizedPatientDateTimeStamp = ensureSpaceInDateTimeFormat(displayPatientDateTimeStamp);
+                    patientDateTimeStampStandardized.value = `${standarizedPatientDateTimeStamp}`;
+
                                     
-// *********************** 1/31/24
+// *********************** 1/31/24: dateTime stamp Modifications ************************************************************************************//
 
                         const dateTimeStampPatternInput = /Action Taken [^]*?(\d{2}\/\d{2}\/\d{4})(?:\s?(\d{2}:\d{2}:\d{2} [APMapm]{2}))?\s?>/;
                         const dateTimeStampMatchInput = text.match(dateTimeStampPatternInput);

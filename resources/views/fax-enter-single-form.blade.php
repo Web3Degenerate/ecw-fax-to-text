@@ -74,9 +74,9 @@
 
     {{-- Provider --}}
                         <div class="form-group">
-                            <label for="provider" class="text-muted mb-1"><small>Patient Provider:</small></label>
-                            <input value="{{old('provider')}}" name="provider" id="patient-provider" class="form-control" type="text" autocomplete="off" />
-                            @error('provider')
+                            <label for="referring_provider" class="text-muted mb-1"><small>Patient Provider:</small></label>
+                            <input value="{{old('referring_provider')}}" name="referring_provider" id="patient-provider" class="form-control" type="text" autocomplete="off" />
+                            @error('referring_provider')
                             <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
                             @enderror
                         </div>

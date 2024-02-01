@@ -245,10 +245,99 @@ class NoteController extends Controller
         return view('fax-enter-single-form', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
     }
 
+
+
+
 // ************ UPDATE OR CREATE NOTE FROM MANUAL FAX FORM ******************************************//
+    
     public function createNoteFromManualFaxForm(Request $request){
+
+        // $getPatient = Patient::find($request->input('mrn'));
+        $get_pt_mrn = $request->input('mrn');
+            $get_pt_name = $request->input('patient_name');
+            $get_pt_dob = $request->input('dob');
+            $get_pt_referring_provider = $request->input('get_pt_referring_provider');
+
+
+         //firstOrCreate vs (v10.20) new createOrfirst: https://laravel-news.com/firstorcreate-vs-createorfirst
+        // FROM StackOverFlow: https://stackoverflow.com/questions/25178464/first-or-create
+        $findPatient = Patient::firstOrCreate([
+            'mrn' => $get_pt_mrn
+        ], [
+            'name' => $get_pt_name,
+            'dob' => $get_pt_dob,
+            'referring_provider' => $get_pt_referring_provider
+        ]);
+// Get dateTime stamp: 
+
+        $get_standardized_date_time_string = $request->input('note_date_time_string_standardized');
+//Instead of using firstOrFail(), which will throw an exception if no note is found, you should use first() and then check if the result is not null. This way, you can handle the case where no note is found more gracefully.
+        // $checkForNote = Note::where('date_time_as_string', $get_standardized_date_time_string)->firstOrFail();
+        $checkForNote = Note::where('date_time_as_string', $get_standardized_date_time_string)->first();
         
-    }
+
+// Consolidate $checkForNote and Note's patient_id equalks current patient id into one if statement:
+        // if($checkForNote){
+        //     if($checkForNote->patient_id == $findPatient->id){
+        //         return back()->with('failure', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') has already been entered in your practice\'s Online Digital E-M program.');
+        //     }
+        // }
+
+        if ($checkForNote && $checkForNote->patient_id == $findPatient->id) {
+            return back()->with('failure', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' (' . $get_pt_mrn . ') has already been entered in your practice\'s Online Digital E-M program.');
+        }
+
+
+        // if(!$checkForNote){
+            $note = new Note;
+
+            $note->patient_id = $findPatient->id;
+
+            $note->patient_name = $get_pt_name; 
+            $note->pt_mrn = $get_pt_mrn; 
+
+            $note->patient_dob = $get_pt_dob; 
+
+// $note->dob_formatted = $request->input('dob_formatted');
+//run migration: $table->date('patient_dob_formatted')->nullable();
+
+            $note->referring_provider = $request->input('referring_provider'); 
+
+            $note->date_time_as_string = $request->input('note_date_time_string_standardized');
+//pure dateTime: Try using the ISO field first (1/31/2024):
+    // $note->date_time = $request->input('note_date_time_formatted')
+// dateTime as ISO (Try this first for the pure dateTime on 1/31/2024)
+    // $note->date_time_iso = $request->input('note_date_time_iso');
+
+    $dateTimeOfNote = $request->input('note_date_time_iso');
+    $clinicTime = $request->input('clinic_time');
+
+        //Store the time spent in minutes: 
+        $note->clinic_time = $clinicTime;   // example 2
+
+// Modified dateTime and time fields: Example: 01/31/2024 08:19 PM
+        $carbonDateTime = Carbon::parse($dateTimeOfNote);
+
+        $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
+
+        $note->time_out = $carbonDateTime->format('h:i:s A'); // stores "08:19 PM"
+
+//ChatGPT code review, merge subMinutes and format into one line
+        // $modifiedDateTime = $carbonDateTime->subMinutes($clinicTime); // creates 01/31/2024 08:17 PM
+            // Format our modifiedDateTime into 'h:i:s A' format
+        // $note->time_in = $modifiedDateTime->format('h:i:s A'); // saves as "08:17 PM"
+        $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('h:i:s A'); // saves as "08:17 PM"
+
+        //******************* END OF NOTE dateTime and time_in and time_out *************************** */           
+        $note->save();   
+
+        return back()->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
+
+
+    // }
+
+
+    } //end of manual save note entry (createNoteFromManualFaxForm)
 
 
 // ***************************************** manuallyGetFaxUpdate() combined function test ********************* //
@@ -395,6 +484,10 @@ class NoteController extends Controller
                     return redirect('/')->with('success', 'Manual Check for New Faxes Completed.');
                 } //End of function manuallyGetFaxUpdate;  replaces=> //End of curl_exec else statment
         
+
+// ******************* FORMAT FOR ChatGPT code review *************************
+
+
 
     } //end of NoteController class; replaces => //end of manuallyGetFaxUpdate() // R 1/25/2024
         

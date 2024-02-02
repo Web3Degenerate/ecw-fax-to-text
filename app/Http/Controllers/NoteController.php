@@ -365,9 +365,47 @@ class NoteController extends Controller
         $note->fax_details_id = $request->input('fax_details_id');
         
 
-        //******************* END OF NOTE dateTime and time_in and time_out *************************** */           
         $note->save();   
+        //******************* END OF CREATE NOTE  *************************** */           
 
+
+        //****************** START OF UpdateOrCreate an Invoice object ********* */
+
+    //ChatGPT recommended setting up separate function: 
+    function calculateBillingCode($cumulativeClinicTime){
+        if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
+            return '99421';
+        } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
+            return '99422';
+        } elseif($cumulativeClinicTime >= 21){
+            return '99423';
+        } else {
+            return 'Online Digital E/M Billing Requirements Not Met';
+        }
+    }
+
+        // $patient = $note->patient;  // We already have $findPatient object available to us:
+        // $clinicTime instead of $note->clinic_time
+
+        $sevenDaysAgo = now()->subDays(7)->startOfDay();
+
+        $invoices = Invoice::updateOrCreate(
+            [
+                'patient_id' => $findPatient->id,
+                'seven_days_from_date_only' => $sevenDaysAgo,
+            ],
+            [
+                'cumulative_clinic_time' => Invoice::where('patient_id', $findPatient->id)
+                    ->where('created_at', '>=', $sevenDaysAgo)
+                    ->sum('clinic_time') + $clinicTime,
+                'billing_code' => calculateBillingCode($cumulativeClinicTime), // Implement this function
+            ]
+        );
+
+
+
+
+    // ******************** END of UpdateOrCreate Invoice Object => finally return back() to the view: **********//
         return back()->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
 
 

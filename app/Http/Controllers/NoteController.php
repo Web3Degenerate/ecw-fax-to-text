@@ -225,7 +225,8 @@ class NoteController extends Controller
 
         // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
 
-        return view('fax-view-single', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
+        return view('fax-view-single', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData, 
+                    'faxDetailsId' => $sFaxDetailsID]);
     }
 
     public function retrieveFaxFormForManualEntry($faxid){
@@ -242,7 +243,8 @@ class NoteController extends Controller
 
         // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
 
-        return view('fax-enter-single-form', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData]);
+        return view('fax-enter-single-form', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData,
+                    'faxDetailsId' => $sFaxDetailsID]);
     }
 
 
@@ -301,7 +303,7 @@ class NoteController extends Controller
 // $note->dob_formatted = $request->input('dob_formatted');
 //run migration: $table->date('patient_dob_formatted')->nullable();
 
-            $note->referring_provider = $request->input('referring_provider'); 
+            $note->note_provider = $request->input('referring_provider'); 
 
             $note->date_time_as_string = $request->input('note_date_time_string_standardized');
 //pure dateTime: Try using the ISO field first (1/31/2024):
@@ -321,12 +323,47 @@ class NoteController extends Controller
         $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
 
         $note->time_out = $carbonDateTime->format('h:i:s A'); // stores "08:19 PM"
+    
+        // Format date_only
+        $current_note_date_on_timestamp = $carbonDateTime->toDateString();
+        $note->date_only = $current_note_date_on_timestamp;
+
+        // Add 7 days to the date_only field
+        $billingExpirationDate = $carbonDateOnly->addDays(7);
+
+        // Save the billing_expiration_date field
+        $note->billing_expiration_date = $billingExpirationDate; // 7 days from current note_date
+
+
+        date_default_timezone_set('America/New_York');
+        $currentEstDate = Carbon::now()->format('Ymd');
+
+        
+// In this corrected code, I used copy() to create a copy of the $currentEstDate before subtracting 7 days to ensure that the original $currentEstDate remains unchanged for the comparison. 
+// Also, I replaced >= with isAfter for the comparison.        
+        // $seven_days_ago_check = $currentEstDate->subDays(7);
+        $seven_days_ago_check = $currentEstDate->copy()->subDays(7);
+
+
+// You're on the right track, but there's a small mistake in your code. subDays(7) returns a new Carbon instance representing the date 7 days ago, so you don't need to perform the date comparison using >=. 
+// Instead, you should use isAfter to check if the note's date is after the calculated date.
+        if ($currentEstDate->isAfter($seven_days_ago_check)) {
+            $note->billing_status = 0; // actively within current 7 day period
+        }else{
+            $note->billing_status = 1; // inactive - more than 7 days from current period.
+        }
+
 
 //ChatGPT code review, merge subMinutes and format into one line
         // $modifiedDateTime = $carbonDateTime->subMinutes($clinicTime); // creates 01/31/2024 08:17 PM
             // Format our modifiedDateTime into 'h:i:s A' format
         // $note->time_in = $modifiedDateTime->format('h:i:s A'); // saves as "08:17 PM"
         $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('h:i:s A'); // saves as "08:17 PM"
+
+        $note->note_body = $request->input('note_body');
+        $note->fax_image_link = $request->input('fax_image_link');
+        $note->fax_details_id = $request->input('fax_details_id');
+        
 
         //******************* END OF NOTE dateTime and time_in and time_out *************************** */           
         $note->save();   

@@ -13,7 +13,14 @@
             </div>
       
       
-      
+      <?php 
+
+            if($pdfData){
+                $fax_image_link = 'data:application/pdf;base64,'. $pdfData .'';
+            }else{
+                $fax_image_link = 'n/a';
+            }
+      ?>
             
       {{-- <div class="row"> --}}
       
@@ -31,6 +38,11 @@
 
                         <form action="/create-note-from-single-fax-form" method="POST" class="mb-0 pt-2 pt-md-0" id="registration-form">
                             @csrf
+
+{{-- Hidden Input Fields --}}
+
+                        <input type="hidden" id="fax_image_link" name="fax_image_link" value="<?php echo $fax_image_link; ?>">
+                        <input type='text' id='fax-details-id' name="fax_details_id" value="<?php echo $faxDetailsId;?>">
 
     {{-- PATIENT NAME --}}
                             <div class="form-group">
@@ -133,6 +145,16 @@
                             @enderror
                         </div>
 
+
+                        <div class="form-group">
+                            <label for="note_body" class="text-muted mb-1"><small>Note Text:</small></label>
+                            <textarea id="note-body" name="note_body" rows="4" class="form-control">
+                                
+                            </textarea>
+                            @error('note_body')
+                                <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                            @enderror
+                        </div>
                         
                             <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Create Note</button>
                   </form>
@@ -219,6 +241,7 @@
                 
                 // const patientMatchesDiv = document.getElementById('patient-matches');
                 const patientMatchesDiv = document.getElementById('notes-container');
+                const noteBodyMatchesDiv = document.getElementById('note-body');
                 
                 // const notesStatusHeader = document.getElementById('notes-status');
                 const notesStatusHeader = document.getElementById('notes-results');
@@ -443,9 +466,14 @@
                                     // const clinicTimePattern = /(?:\d{2}\/\d{2}\/\d{4}(?:\s?\d{2}:\d{2}:\d{2} [APMapm]{2})?)>(\d+)\s*(?:minutes)?[^]*?Date: \d{2}\/\d{2}\/\d{4}/;
                             // Clinic Time without minutes, skip Action taken, skip dateTime stamp START AM> or PM>
                                     // const clinicTimePattern = /(?:AM|am|PM|pm)>(\d+)\s*(?:minutes)?[^]*?Date: \d{2}\/\d{2}\/\d{4}/;        
-                            // Clinic Time (updated 1/30/24 - 4pm) to start at AM/PM> and allow text/space before and after numer: 
-                                    const clinicTimePattern = /(?:AM|am|PM|pm)>[^]*?(\d+)\s*(?:minutes)?[^]*?Date: \d{2}\/\d{2}\/\d{4}/;
+   
+    // ********* LAST WORKING clinicTimePattern on Thu Feb 1 2024, before adjusting possible ending on 'Provider.'                         
+            // Clinic Time (updated 1/30/24 - 4pm) to start at AM/PM> and allow text/space before and after numer: 
+                                    // const clinicTimePattern = /(?:AM|am|PM|pm)>[^]*?(\d+)\s*(?:minutes)?[^]*?Date: \d{2}\/\d{2}\/\d{4}/;
     
+    // POSSIBLE CHANGE TO CLINIC TIME REGEX => Stop searching when it finds EITHER 'Date: MM/DD/YYYY' or 'Provider.'
+                                    const clinicTimePattern = /(?:AM|am|PM|pm)>[^]*?(\d+)\s*(?:minutes)?[^]*?(?:Date: \d{2}\/\d{2}\/\d{4}|Provider\.)/;
+                                    
                                     const clinicTimeMatch = text.match(clinicTimePattern);
                                     const displayPatientClinicTime = clinicTimeMatch ? parseInt(clinicTimeMatch[1], 10) : 'Error: Clinic Time Not Found';
 
@@ -500,6 +528,14 @@
                                     });
                                     patientMatchesDiv.appendChild(NotesUl);    
                                     notesStatusHeader.innerHTML = "<h3>Extracted Provider Note Results</h3>";
+
+                                    // matches.forEach(match => {
+                                    //     noteBodyMatchesDiv.value(match);
+                                    // });
+
+                                    // Set the textarea value to the matched text
+                                    noteBodyMatchesDiv.value = matches.map(match => match[0]).join('\n');
+                                    
             
             
                                 });
@@ -520,8 +556,11 @@
     
     <?php
         if ($pdfData) {
+            $display_fax_image_link = 'data:application/pdf;base64,'. $pdfData .'';
           // Display the embedded PDF
-            echo '<iframe title="PDF Viewer" width="100%" height="500px" src="data:application/pdf;base64,'.$pdfData.'" /></div></div><p>end of page</p></x-faxlayout>';
+            // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="data:application/pdf;base64,'.$pdfData.'" /></div></div><p>end of page</p></x-faxlayout>';
+            echo '<iframe title="PDF Viewer" width="100%" height="500px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
+            
             // echo '</div></div></x-faxlayout>';
       } else {
             echo '<h3>Error fetching fax image. Please try again.</3>';

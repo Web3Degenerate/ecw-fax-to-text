@@ -61,11 +61,13 @@ return new class extends Migration
         //Shouldn't need:        
             $table->string('fax_status')->nullable();
             $table->string('note_provider')->nullable(); // Ham, Kim or Hm, Kim etc.
-            $table->boolean('billing_status')->default(0); // 0 for billing eligible, 1 or already billed? 
-            $table->string('billing_number')->nullable(); // identifier for billing group? 000008          
             $table->string('patient_name')->nullable(); // ZZtest, Vern
             $table->string('patient_dob')->nullable();  // 01/01/1963
-    //Error: Column already exists: 1060 Duplicate column name 'patient_mrn'
+            //Error: Column already exists: 1060 Duplicate column name 'patient_mrn'
+            
+            $table->boolean('billing_status')->default(0); // 0 for billing eligible, 1 or already billed? 
+            $table->string('billing_number')->nullable(); // identifier for billing group? 000008          
+
             $table->timestamps();
         });
     }

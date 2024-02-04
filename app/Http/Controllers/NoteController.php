@@ -67,9 +67,10 @@ class NoteController extends Controller
                 $currentDate = Carbon::now()->format('Ymd');
                 $sEndDate = $currentDate;
 
-                // Go back 14 days from the current date
-                $startDateObj = Carbon::now()->subDays(14);
-                $sStartDate = $startDateObj->format('Ymd');
+                // Go back X days from the current date: 1/23/2024 => 2/6/2024 (14 days)
+                    // $startDateObj = Carbon::now()->subDays(14);
+                    // $sStartDate = $startDateObj->format('Ymd');
+                $sStartDate = '20240123';
             
               $postVariables = array(
                 'action'           => 'Get_Fax_Inbox',

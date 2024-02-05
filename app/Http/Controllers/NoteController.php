@@ -53,7 +53,7 @@ class NoteController extends Controller
 
     public function getFaxInbox(){
             // Dynamically set $sEndDate to current day (in EST) and set $sStartDate will be 14 prior to $sEndDate. 
-            date_default_timezone_set('America/New_York'); // Set the timezone to Eastern Time
+            // date_default_timezone_set('America/New_York'); // Set the timezone to Eastern Time
         
             // // Get the current date in 'YYYYMMDD' format
             //     $currentDate = (new DateTime())->format('Ymd');
@@ -64,7 +64,8 @@ class NoteController extends Controller
             //     $sStartDate = $startDateObj->format('Ymd');
 
             // Get the current date in 'YYYYMMDD' format
-                $currentDate = Carbon::now()->format('Ymd');
+                // $currentDate = Carbon::now()->format('Ymd');
+                $currentDate = Carbon::now('America/New_York')->format('Ymd');
                 $sEndDate = $currentDate;
 
                 // Go back X days from the current date: 1/23/2024 => 2/6/2024 (14 days)
@@ -177,37 +178,74 @@ class NoteController extends Controller
 
 
  // check fax inbox: GET ROUTE  
+ // show all faxes in date range without saving them as notes (original version)
     public function checkFaxInbox() {
+        $check_srfax_inbox = $this->getFaxInbox();
+        return view('fax-inbox-list', ['faxDataContents' => $check_srfax_inbox]);
+    }
+
+// show all notes which are partially created from the faxes received (2/4/2024 version)
+    public function showFaxInbox() {
 
         $check_srfax_inbox = $this->getFaxInbox();
         //         $response = file_get_contents($check_srfax_inbox);
-        //         $result_get_fax_inbox = json_decode($response, true);
+                $result_get_fax_inbox = json_decode($check_srfax_inbox, true);
         
         //    // Pull out the array results
-        //             if ($result_get_fax_inbox && isset($result_get_fax_inbox['Result'])) {
-        //                 $faxData = $result_get_fax_inbox['Result'];
-        //             // **** GOOD UP TO $faxData ************************************************************* //
+                    if ($result_get_fax_inbox && isset($result_get_fax_inbox['Result'])) {
+                        $faxData = $result_get_fax_inbox['Result'];
+                    // **** GOOD UP TO $faxData ************************************************************* //
 
-        //                     // foreach ($faxData as $fax) {
+                            foreach ($faxData as $fax) {
                     
-        //                     //     // Extract sFaxDetailsID from FileName
-        //                     //         $fileNameParts = explode('|', $fax['FileName']);
-        //                     //     $sFaxDetailsID = isset($fileNameParts[1]) ? $fileNameParts[1] : '';
-        //                     //     $sFaxFileName = isset($fileNameParts[0]) ? $fileNameParts[0] : '';
+                                // Extract sFaxDetailsID from FileName
+                                    $fileNameParts = explode('|', $fax['FileName']);
+                                $sFaxDetailsID = isset($fileNameParts[1]) ? $fileNameParts[1] : '';
+                                $sFaxFileName = isset($fileNameParts[0]) ? $fileNameParts[0] : '';
                                 
-        //                     //     // Pull the Date Fax was Sent??
-        //                     //             // echo urlencode($fax['Date']);
-        //                     //             // echo 'Date: ' . $fax['Date'];
-        //                     //     $date_fax_sent = $fax['Date'];       
-        //                     //     $fax_status = $fax['ReceiveStatus'];
-        //                     // }
+                                // Pull the Date Fax was Sent??
+                                        // echo urlencode($fax['Date']);
+                                        // echo 'Date: ' . $fax['Date'];
+                                $date_fax_sent = $fax['Date'];       
+                                $fax_status = $fax['ReceiveStatus'];
+                                $checkForNote = Note::where('fax_details_id', $sFaxDetailsID)->first();
 
-        //             } else {
-        //                 $faxData = '';
-        //             }
+                                    if(!$checkForNote){
+                                        $note = new Note;
+                                        $note->patient_id = 1; //Enter id of Catchall User
+                                            // Set the timezone to Eastern Standard Time
+                                            $currentDate = Carbon::now('America/New_York')->format('Ymd');
+                                            $set_default_expiration_date = $currentDate->addDays(7);
+                                        
+                                        $note->billing_expiration_date = $set_default_expiration_date;
+                                        $note->patient_name = 'Patient Inbox';
+                                        $note->pt_mrn = '911';
+
+                                        $note->fax_file_name = $sFaxFileName;
+                                        $note->fax_details_id = $sFaxDetailsID;
+                                        $note->fax_status = $fax_status;
+                                    
+                                        $note->date_time_fax_received = Carbon::parse($date_fax_sent);
+                                        
+                                        $note->save();
+                                    }
+                            }
+
+                            // return view('fax-inbox')->with('success', 'Faxes Updated.');
+                            $notes = Note::all();
+                            $hardCodedMessage = 'Success! New faxes have been updated';
+                            $displayBox = "alert alert-success text-center";
+                            return view('fax-inbox', ['faxMessage' => $hardCodedMessage, 'notes' => $notes, 'displayBox' => $displayBox]);
+                    } else {
+                        // $faxData = '';
+                        $notes = Note::all();
+                        $hardCodedMessage = 'No new faxes have been received';
+                        $displayBox = "alert alert-danger text-center";
+                        return view('fax-inbox', ['faxMessage' => $hardCodedMessage, 'notes' => $notes, 'displayBox' => $displayBox]);
+                    }
 
             // return view('fax-inbox', ['faxData' => $faxData]);
-            return view('fax-inbox', ['faxDataContents' => $check_srfax_inbox]);
+            // return view('fax-inbox', ['faxDataContents' => $check_srfax_inbox]);
 
     } 
 
@@ -292,7 +330,16 @@ class NoteController extends Controller
 
 
         // if(!$checkForNote){
-            $note = new Note;
+            // $note = new Note;
+            $fax_details_id = $request->input('fax_details_id');
+
+            $note = Note::where('fax_details_id', $fax_details_id)->first();
+
+            if($note){
+                $note = $note;
+            }else{
+                $note = new Note;
+            }
 
             $note->patient_id = $findPatient->id;
 
@@ -336,8 +383,9 @@ class NoteController extends Controller
         $note->billing_expiration_date = $billingExpirationDate; // 7 days from current note_date
 
 
-        date_default_timezone_set('America/New_York');
-        $currentEstDate = Carbon::now()->format('Ymd');
+        // date_default_timezone_set('America/New_York');
+        // $currentEstDate = Carbon::now()->format('Ymd');
+        $currentEstDate = Carbon::now('America/New_York')->format('Ymd');
 
         
 // In this corrected code, I used copy() to create a copy of the $currentEstDate before subtracting 7 days to ensure that the original $currentEstDate remains unchanged for the comparison. 
@@ -354,6 +402,7 @@ class NoteController extends Controller
             $note->billing_status = 1; // inactive - more than 7 days from current period.
         }
 
+        $note->review_status = 1; //migration on 2/4/2024 as another boolean value, 0 needs review, 1 review complete.
 
 //ChatGPT code review, merge subMinutes and format into one line
         // $modifiedDateTime = $carbonDateTime->subMinutes($clinicTime); // creates 01/31/2024 08:17 PM
@@ -363,9 +412,8 @@ class NoteController extends Controller
 
         $note->note_body = $request->input('note_body');
         $note->fax_image_link = $request->input('fax_image_link');
-        $note->fax_details_id = $request->input('fax_details_id');
+        // $note->fax_details_id = $request->input('fax_details_id');
         
-
         $note->save();   
         //******************* END OF CREATE NOTE  *************************** */           
 

@@ -1,5 +1,4 @@
-
-1. Get current date in EST: 
+1. Get current date in EST:
 
 ```php
     date_default_timezone_set('America/New_York');
@@ -11,12 +10,12 @@
 
 ```php
 // *** CHECK IF CURRENT EST DATE IS WITHIN 7 DAYS OF NOTE DATE:
-        date_default_timezone_set('America/New_York');
-        $currentEstDate = Carbon::now()->format('Ymd');
+        // date_default_timezone_set('America/New_York');
+        $currentEstDate = Carbon::now('America/New_York')->format('Ymd');
 
         $seven_days_ago_check = $currentEstDate->subDays(7);
 
-// You're on the right track, but there's a small mistake in your code. subDays(7) returns a new Carbon instance representing the date 7 days ago, so you don't need to perform the date comparison using >=. 
+// You're on the right track, but there's a small mistake in your code. subDays(7) returns a new Carbon instance representing the date 7 days ago, so you don't need to perform the date comparison using >=.
 // Instead, you should use isAfter to check if the note's date is after the calculated date.
         if ($currentEstDate->isAfter($seven_days_ago_check)) {
             $note->billing_status = 0; // actively within current 7 day period
@@ -26,7 +25,25 @@
 
 ```
 
-3. See [NotesController@createNoteFromManualFaxForm](https://github.com/Web3Degenerate/ecw-fax-to-text/blob/master/app/Http/Controllers/NoteController.php) for a good example of working with dates. 
+---
+
+3. Use Carbon Parse to ensure date / time formats will be saved as desired:
+
+```php
+
+    $dateTimeOfNote = $request->input('note_date_time_iso');
+// Modified dateTime and time fields: Example: 01/31/2024 08:19 PM
+        $carbonDateTime = Carbon::parse($dateTimeOfNote);
+
+        $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
+
+        $note->time_out = $carbonDateTime->format('h:i:s A'); // stores "08:19 PM"
+
+```
+
+---
+
+4. See [NotesController@createNoteFromManualFaxForm](https://github.com/Web3Degenerate/ecw-fax-to-text/blob/master/app/Http/Controllers/NoteController.php) for a good example of working with dates.
 
 ```php
 
@@ -36,7 +53,7 @@
     $dateTimeOfNote = $request->input('note_date_time_iso');
     $clinicTime = $request->input('clinic_time');
 
-        //Store the time spent in minutes: 
+        //Store the time spent in minutes:
         $note->clinic_time = $clinicTime;   // example 2
 
 // Modified dateTime and time fields: Example: 01/31/2024 08:19 PM
@@ -45,7 +62,7 @@
         $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
 
         $note->time_out = $carbonDateTime->format('h:i:s A'); // stores "08:19 PM"
-    
+
         // Format date_only
         $current_note_date_on_timestamp = $carbonDateTime->toDateString();
         $note->date_only = $current_note_date_on_timestamp;
@@ -62,7 +79,7 @@
 
         $seven_days_ago_check = $currentEstDate->subDays(7);
 
-// You're on the right track, but there's a small mistake in your code. subDays(7) returns a new Carbon instance representing the date 7 days ago, so you don't need to perform the date comparison using >=. 
+// You're on the right track, but there's a small mistake in your code. subDays(7) returns a new Carbon instance representing the date 7 days ago, so you don't need to perform the date comparison using >=.
 // Instead, you should use isAfter to check if the note's date is after the calculated date.
         if ($currentEstDate->isAfter($seven_days_ago_check)) {
             $note->billing_status = 0; // actively within current 7 day period

@@ -155,7 +155,10 @@ Route::get('/hub/{patient:mrn}/edit', [UserController::class, 'getHubEdit']);
 // **************************** FAX RELATED ROUTES ********************************************* //
 
 // Copy of rxminter/srfax index.php
-Route::get('/fax-inbox', [NoteController::class, 'checkFaxInbox']);
+Route::get('/fax-inbox-list', [NoteController::class, 'checkFaxInbox']);
+
+Route::get('/fax-inbox', [NoteController::class, 'showFaxInbox']);
+
 
 Route::get('/view-single-fax/{faxid}', [NoteController::class, 'retrieveSingleFax']);
 

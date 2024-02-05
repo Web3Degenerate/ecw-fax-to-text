@@ -7,6 +7,8 @@ use App\Models\Patient;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 
+use App\Models\Invoice;
+
 use DB; 
 use Carbon\Carbon; 
 
@@ -65,13 +67,18 @@ class NoteController extends Controller
 
             // Get the current date in 'YYYYMMDD' format
                 // $currentDate = Carbon::now()->format('Ymd');
-                $currentDate = Carbon::now('America/New_York')->format('Ymd');
-                $sEndDate = $currentDate;
 
-                // Go back X days from the current date: 1/23/2024 => 2/6/2024 (14 days)
-                    // $startDateObj = Carbon::now()->subDays(14);
-                    // $sStartDate = $startDateObj->format('Ymd');
-                $sStartDate = '20240123';
+                $currentDate = Carbon::now('America/New_York')->format('Ymd');
+                // $sEndDate = $currentDate;
+//For testing, set sEndDate to hardcoded 2/3/2023
+        $sEndDate = '20240203';
+                    // Go back X days from the current date: 1/23/2024 => 2/6/2024 (14 days)
+                        // $startDateObj = Carbon::now()->subDays(14);
+                        // $sStartDate = $startDateObj->format('Ymd');
+        $sStartDate = '20240123';
+
+                // $sEndDate = '20220206';
+                // $sStartDate = '20220205';
             
               $postVariables = array(
                 'action'           => 'Get_Fax_Inbox',
@@ -214,8 +221,9 @@ class NoteController extends Controller
                                         $note = new Note;
                                         $note->patient_id = 1; //Enter id of Catchall User
                                             // Set the timezone to Eastern Standard Time
-                                            $currentDate = Carbon::now('America/New_York')->format('Ymd');
-                                            $set_default_expiration_date = $currentDate->addDays(7);
+                                            // $currentDate = Carbon::now('America/New_York')->format('Ymd');
+                                            // $set_default_expiration_date = $currentDate->addDays(7);
+                                            $set_default_expiration_date = Carbon::now('America/New_York')->addDays(7)->format('Ymd');
                                         
                                         $note->billing_expiration_date = $set_default_expiration_date;
                                         $note->patient_name = 'Patient Inbox';
@@ -297,7 +305,7 @@ class NoteController extends Controller
         $get_pt_mrn = $request->input('mrn');
             $get_pt_name = $request->input('patient_name');
             $get_pt_dob = $request->input('dob');
-            $get_pt_referring_provider = $request->input('get_pt_referring_provider');
+            $get_pt_referring_provider = $request->input('referring_provider');
 
 
          //firstOrCreate vs (v10.20) new createOrfirst: https://laravel-news.com/firstorcreate-vs-createorfirst
@@ -314,19 +322,21 @@ class NoteController extends Controller
         $get_standardized_date_time_string = $request->input('note_date_time_string_standardized');
 //Instead of using firstOrFail(), which will throw an exception if no note is found, you should use first() and then check if the result is not null. This way, you can handle the case where no note is found more gracefully.
         // $checkForNote = Note::where('date_time_as_string', $get_standardized_date_time_string)->firstOrFail();
-        $checkForNote = Note::where('date_time_as_string', $get_standardized_date_time_string)->first();
         
+        
+        
+        // Consolidate $checkForNote and Note's patient_id equalks current patient id into one if statement:
+            // if($checkForNote){
+                //     if($checkForNote->patient_id == $findPatient->id){
+                    //         return back()->with('failure', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') has already been entered in your practice\'s Online Digital E-M program.');
+                    //     }
+                    // }
 
-// Consolidate $checkForNote and Note's patient_id equalks current patient id into one if statement:
-        // if($checkForNote){
-        //     if($checkForNote->patient_id == $findPatient->id){
-        //         return back()->with('failure', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') has already been entered in your practice\'s Online Digital E-M program.');
-        //     }
-        // }
-
-        if ($checkForNote && $checkForNote->patient_id == $findPatient->id) {
-            return back()->with('failure', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' (' . $get_pt_mrn . ') has already been entered in your practice\'s Online Digital E-M program.');
-        }
+// 2/5/2024 - Temporarily turn off the check based on action taken dateTime stamp:
+// $checkForNote = Note::where('date_time_as_string', $get_standardized_date_time_string)->first();
+// if ($checkForNote && $checkForNote->patient_id == $findPatient->id) {
+//     return back()->with('failure', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' (' . $get_pt_mrn . ') has already been entered in your practice\'s Online Digital E-M program.');
+// }
 
 
         // if(!$checkForNote){
@@ -370,14 +380,14 @@ class NoteController extends Controller
 
         $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
 
-        $note->time_out = $carbonDateTime->format('h:i:s A'); // stores "08:19 PM"
+        $note->time_out = $carbonDateTime->format('H:i:s'); // stores "08:19 PM as 20:19:00"
     
         // Format date_only
         $current_note_date_on_timestamp = $carbonDateTime->toDateString();
         $note->date_only = $current_note_date_on_timestamp;
 
         // Add 7 days to the date_only field
-        $billingExpirationDate = $carbonDateOnly->addDays(7);
+        $billingExpirationDate = $carbonDateTime->copy()->addDays(7)->format('Ymd');
 
         // Save the billing_expiration_date field
         $note->billing_expiration_date = $billingExpirationDate; // 7 days from current note_date
@@ -385,22 +395,44 @@ class NoteController extends Controller
 
         // date_default_timezone_set('America/New_York');
         // $currentEstDate = Carbon::now()->format('Ymd');
-        $currentEstDate = Carbon::now('America/New_York')->format('Ymd');
+        // $currentEstString = Carbon::now('America/New_York')->format('Ymd');
+        // $currentEstDate = Carbon::parse($currentEstString);
 
+//*************** TODO: convert date as string to date object so you can compare it: *********************************************** //
+// $currentDate = Carbon::now('America/New_York')->format('Ymd');
+// $currentEstDate = $currentDate;
         
 // In this corrected code, I used copy() to create a copy of the $currentEstDate before subtracting 7 days to ensure that the original $currentEstDate remains unchanged for the comparison. 
 // Also, I replaced >= with isAfter for the comparison.        
         // $seven_days_ago_check = $currentEstDate->subDays(7);
-        $seven_days_ago_check = $currentEstDate->copy()->subDays(7);
+        // $seven_days_ago_check = $currentEstDate->copy()->subDays(7);
+        // ERROR: Call to a member function copy() on string
+            // $seven_days_ago_check = $currentEstDate->subDays(7)->format('Ymd');
 
 
 // You're on the right track, but there's a small mistake in your code. subDays(7) returns a new Carbon instance representing the date 7 days ago, so you don't need to perform the date comparison using >=. 
 // Instead, you should use isAfter to check if the note's date is after the calculated date.
-        if ($currentEstDate->isAfter($seven_days_ago_check)) {
-            $note->billing_status = 0; // actively within current 7 day period
-        }else{
-            $note->billing_status = 1; // inactive - more than 7 days from current period.
-        }
+        // if ($currentEstDate->isAfter($seven_days_ago_check)) {
+// if ($billingExpirationDate->isAfter($currentEstDate)) {   
+//     $note->billing_status = 0; // actively within current 7 day period
+// }else{
+//     $note->billing_status = 1; // inactive - more than 7 days from current period.
+// }
+//*************** TODO: convert date as string to date object so you can compare it: *********************************************** //
+
+    // $current_note_date = $carbonDateTime->format('Ymd');
+    
+    // $patient_em_date = $findPatient->em_date;
+    // if($patient_em_date){
+    //     $seven_days_after_patient_em_date = $patient_em_date->addDays(7);
+    //     if ($current_note_date > $seven_days_after_patient_em_date) {   // if ($billingExpirationDate->isAfter($currentEstDate)) {     
+    //         $note->billing_status_string = 'pending; // pending - note outside of 7 day window from last em visit
+    //     }else{
+    //         $note->billing_status_string = 'invalid'; // inactive - note within 7 days of last em visit
+    //     }
+    // }
+
+
 
         $note->review_status = 1; //migration on 2/4/2024 as another boolean value, 0 needs review, 1 review complete.
 
@@ -408,10 +440,12 @@ class NoteController extends Controller
         // $modifiedDateTime = $carbonDateTime->subMinutes($clinicTime); // creates 01/31/2024 08:17 PM
             // Format our modifiedDateTime into 'h:i:s A' format
         // $note->time_in = $modifiedDateTime->format('h:i:s A'); // saves as "08:17 PM"
-        $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('h:i:s A'); // saves as "08:17 PM"
+        // $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('h:i:s A'); // saves as "08:17 PM"
+        $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('H:i:s'); // saves as "20:17:00"
 
-        $note->note_body = $request->input('note_body');
-        $note->fax_image_link = $request->input('fax_image_link');
+
+        // $note->note_body = $request->input('note_body');
+        // $note->fax_image_link = $request->input('fax_image_link');
         // $note->fax_details_id = $request->input('fax_details_id');
         
         $note->save();   
@@ -438,6 +472,14 @@ class NoteController extends Controller
 
         $sevenDaysAgo = now()->subDays(7)->startOfDay();
 
+        //Pass Array to where clause: https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
+        $matchThese = ['patient_id' => $findPatient->id, 'seven_days_from_date_only' => $sevenDaysAgo];
+        $checkOtherInvoices = Invoice::where($matchThese)->get();
+        // get first then sum?? see: https://laracasts.com/discuss/channels/eloquent/laravel-how-to-calculate-sum-of-column-values-using-eloquent
+        // $checkOtherInvoices = Invoice::where($matchThese)->sum('clinic_time');
+        $checkExistingTotal = $checkOtherInvoices->sum('clinic_time');
+        $cumulativeClinicTime = $clinicTime + $checkExistingTotal;
+
         $invoices = Invoice::updateOrCreate(
             [
                 'patient_id' => $findPatient->id,
@@ -455,8 +497,8 @@ class NoteController extends Controller
 
 
     // ******************** END of UpdateOrCreate Invoice Object => finally return back() to the view: **********//
-        return back()->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
-
+        // return back()->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
+        return redirect('/fax-inbox')->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
 
     // }
 

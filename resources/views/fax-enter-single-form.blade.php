@@ -41,7 +41,7 @@
 
 {{-- Hidden Input Fields --}}
 
-                        <input type="hidden" id="fax_image_link" name="fax_image_link" value="<?php echo $fax_image_link; ?>">
+                        <input type="text" id="fax_image_link" name="fax_image_link" value="<?php echo $fax_image_link; ?>">
                         <input type='text' id='fax-details-id' name="fax_details_id" value="<?php echo $faxDetailsId;?>">
 
     {{-- PATIENT NAME --}}

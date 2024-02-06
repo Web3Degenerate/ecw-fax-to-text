@@ -15,7 +15,7 @@
   <div class="container py-md-5">
 
     
-    <h1 class="display-5">Enroll A New Patient</h1>
+    <h1 class="display-5">Enroll A New <strong>User</strong> Account</h1>
     {{-- <p class="lead text-muted">Log in to manage your patients&rsquo; &ldquo;Digital Online E-M&rdquo; encounters as they are sent from your EHR/EMR.</p>         --}}
     <p class="lead text-muted">Enter the form to enroll a new patient into Dent&rsquo;s Digital Online E-M Program.</p>
     

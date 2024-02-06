@@ -37,7 +37,8 @@
              
               <a href="/profile/{{ auth()->user()->username }}" class="mr-2"><img title="My Profile" data-toggle="tooltip" data-placement="bottom" style="width: 32px; height: 32px; border-radius: 16px" src="/images/DentCareTeam-Sidebar-Logo-Zoom.jpg" /></a>
               
-              <a class="btn btn-sm btn-success mr-2" href="/create-post">Create Post</a>
+              <a class="btn btn-sm btn-success mr-2" href="/enroll/patient">Enroll Patient</a>
+              <a class="btn btn-sm btn-primary mr-2" href="/fax-inbox">Review Faxes</a>
               <form action="/logout" method="POST" class="d-inline">
                 @csrf
                 <button class="btn btn-sm btn-secondary">Sign Out</button>

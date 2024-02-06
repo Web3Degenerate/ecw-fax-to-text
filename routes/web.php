@@ -43,7 +43,8 @@ Route::get('/', [UserController::class, 'showCorrectHomepage'])->name('login');
 
 // &&& #DCT &&&  Remove the ->name('login') limitation for testing the /enroll route: ##################################################################################
 // Route::get('/enroll', [UserController::class, 'showEnrollForm'])->name('login');
-Route::get('/enroll', [UserController::class, 'showEnrollForm']);
+Route::get('/enroll', [UserController::class, 'showEnrollUserForm']);
+Route::get('/enroll/patient', [UserController::class, 'showEnrollPatientForm']);
 
 //Register user route: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207604#content
 // Route::post('/register', [UserController::class, 'register'])->middleware('guest');
@@ -136,7 +137,8 @@ Route::post('/register-new-online-digitial-em-patient', [PatientController::clas
 
 // &&& #DCT &&& - view patient Dashboard
 // Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
-Route::get('/hub/{patient:mrn}', [PatientController::class, 'viewPatient']);
+// Route::get('/hub/{patient:mrn}', [PatientController::class, 'viewPatient']);
+Route::get('/hub/{id}', [PatientController::class, 'viewPatient']);
 
 // &&& #DCT &&& - #ToDo - Add edit page and route: 
 Route::get('/edit-patient/{patient:mrn}', [PatientController::class, 'editPatient']);

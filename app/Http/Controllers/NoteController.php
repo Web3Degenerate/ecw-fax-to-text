@@ -69,9 +69,9 @@ class NoteController extends Controller
                 // $currentDate = Carbon::now()->format('Ymd');
 
                 $currentDate = Carbon::now('America/New_York')->format('Ymd');
-                // $sEndDate = $currentDate;
+                $sEndDate = $currentDate;
 //For testing, set sEndDate to hardcoded 2/3/2023
-        $sEndDate = '20240203';
+        // $sEndDate = '20240203';
                     // Go back X days from the current date: 1/23/2024 => 2/6/2024 (14 days)
                         // $startDateObj = Carbon::now()->subDays(14);
                         // $sStartDate = $startDateObj->format('Ymd');
@@ -388,9 +388,10 @@ class NoteController extends Controller
 
         // Add 7 days to the date_only field
         $billingExpirationDate = $carbonDateTime->copy()->addDays(7)->format('Ymd');
+        $formatted_billingExpirationDate = Carbon::createFromFormat('Ymd', $billingExpirationDate);
 
         // Save the billing_expiration_date field
-        $note->billing_expiration_date = $billingExpirationDate; // 7 days from current note_date
+        $note->billing_expiration_date = $formatted_billingExpirationDate; // 7 days from current note_date
 
 
         // date_default_timezone_set('America/New_York');
@@ -420,17 +421,62 @@ class NoteController extends Controller
 // }
 //*************** TODO: convert date as string to date object so you can compare it: *********************************************** //
 
+
+
+// ************************************************************************************************************************************* //
     // $current_note_date = $carbonDateTime->format('Ymd');
+    // $current_note_date = Carbon::createFromFormat('Ymd', $carbonDateTime);
     
     // $patient_em_date = $findPatient->em_date;
     // if($patient_em_date){
-    //     $seven_days_after_patient_em_date = $patient_em_date->addDays(7);
-    //     if ($current_note_date > $seven_days_after_patient_em_date) {   // if ($billingExpirationDate->isAfter($currentEstDate)) {     
-    //         $note->billing_status_string = 'pending; // pending - note outside of 7 day window from last em visit
+
+    //     $seven_days_after_patient_em_date = $findPatient->em_date;
+    //     // $formatted_seven_days = $seven_days_after_patient_em_date->format("Ymd");
+    //     // $carbon_formatted_seven_days = Carbon::parse($formatted_seven_days);
+    //     // $compare_em_date_visitz = $carbon_formatted_seven_days->format('Ymd');
+
+    //     $get_note_date_timerz = $request->input('note_date_time_iso');
+    //     $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+    //     $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+
+
+        
+    //     // $formatted_seven_days = Carbon::createFromFormat('Ymd', $seven_days_after_patient_em_date);
+    //         // 2024-01-26 > 1/23 => 2024-01-29
+    //     // if ($compare_note_date_onlyz > $seven_days_after_patient_em_date) {   // if ($billingExpirationDate->isAfter($currentEstDate)) { 
+    //     if ($compare_note_date_onlyz->isAfter($seven_days_after_patient_em_date)) {    
+    //         $note->billing_status_string = 'pending'; // pending - note outside of 7 day window from last em visit
     //     }else{
     //         $note->billing_status_string = 'invalid'; // inactive - note within 7 days of last em visit
     //     }
+    // }else{
+    //     $note->billing_status_string = 'check';
     // }
+
+
+
+    $patient_em_date = $findPatient->em_date;
+
+    if ($patient_em_date) {
+        // Convert the patient_em_date string to a Carbon instance
+        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
+    
+        $get_note_date_timerz = $request->input('note_date_time_iso');
+        $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+        $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+    
+        // Compare the Carbon instances
+        if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
+            $note->billing_status_string = 'pending';
+        } else {
+            $note->billing_status_string = 'invalid';
+        }
+    } else {
+        $note->billing_status_string = 'check';
+    }
+
+
+
 
 
 
@@ -454,44 +500,44 @@ class NoteController extends Controller
 
         //****************** START OF UpdateOrCreate an Invoice object ********* */
 
-    //ChatGPT recommended setting up separate function: 
-    function calculateBillingCode($cumulativeClinicTime){
-        if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
-            return '99421';
-        } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
-            return '99422';
-        } elseif($cumulativeClinicTime >= 21){
-            return '99423';
-        } else {
-            return 'Online Digital E/M Billing Requirements Not Met';
-        }
-    }
+    // //ChatGPT recommended setting up separate function: 
+    // function calculateBillingCode($cumulativeClinicTime){
+    //     if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
+    //         return '99421';
+    //     } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
+    //         return '99422';
+    //     } elseif($cumulativeClinicTime >= 21){
+    //         return '99423';
+    //     } else {
+    //         return 'Online Digital E/M Billing Requirements Not Met';
+    //     }
+    // }
 
-        // $patient = $note->patient;  // We already have $findPatient object available to us:
-        // $clinicTime instead of $note->clinic_time
+    //     // $patient = $note->patient;  // We already have $findPatient object available to us:
+    //     // $clinicTime instead of $note->clinic_time
 
-        $sevenDaysAgo = now()->subDays(7)->startOfDay();
+    //     $sevenDaysAgo = now()->subDays(7)->startOfDay();
 
-        //Pass Array to where clause: https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
-        $matchThese = ['patient_id' => $findPatient->id, 'seven_days_from_date_only' => $sevenDaysAgo];
-        $checkOtherInvoices = Invoice::where($matchThese)->get();
-        // get first then sum?? see: https://laracasts.com/discuss/channels/eloquent/laravel-how-to-calculate-sum-of-column-values-using-eloquent
-        // $checkOtherInvoices = Invoice::where($matchThese)->sum('clinic_time');
-        $checkExistingTotal = $checkOtherInvoices->sum('clinic_time');
-        $cumulativeClinicTime = $clinicTime + $checkExistingTotal;
+    //             //Pass Array to where clause: https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
+    //     $matchThese = ['patient_id' => $findPatient->id, 'seven_days_from_date_only' => $sevenDaysAgo];
+    //     $checkOtherInvoices = Invoice::where($matchThese)->get();
+    //             // get first then sum?? see: https://laracasts.com/discuss/channels/eloquent/laravel-how-to-calculate-sum-of-column-values-using-eloquent
+    //             // $checkOtherInvoices = Invoice::where($matchThese)->sum('clinic_time');
+    //     $checkExistingTotal = $checkOtherInvoices->sum('clinic_time');
+    //     $cumulativeClinicTime = $clinicTime + $checkExistingTotal;
 
-        $invoices = Invoice::updateOrCreate(
-            [
-                'patient_id' => $findPatient->id,
-                'seven_days_from_date_only' => $sevenDaysAgo,
-            ],
-            [
-                'cumulative_clinic_time' => Invoice::where('patient_id', $findPatient->id)
-                    ->where('created_at', '>=', $sevenDaysAgo)
-                    ->sum('clinic_time') + $clinicTime,
-                'billing_code' => calculateBillingCode($cumulativeClinicTime), // Implement this function
-            ]
-        );
+    //     $invoices = Invoice::updateOrCreate(
+    //         [
+    //             'patient_id' => $findPatient->id,
+    //             'seven_days_from_date_only' => $sevenDaysAgo,
+    //         ],
+    //         [
+    //             'cumulative_clinic_time' => Invoice::where('patient_id', $findPatient->id)
+    //                 ->where('created_at', '>=', $sevenDaysAgo)
+    //                 ->sum('clinic_time') + $clinicTime,
+    //             'billing_code' => calculateBillingCode($cumulativeClinicTime), // Implement this function
+    //         ]
+    //     );
 
 
 

@@ -98,3 +98,20 @@
         $note->fax_image_link = $request->input('fax_image_link');
         $note->fax_details_id = $request->input('fax_details_id');
 ```
+
+5. On front end, display the current date in php:
+
+```php
+                  <?php
+                    //(1/24/2024) - Dynamically set sEndDate to current day (in EST) and set sStartDate will be 2 days back.
+                      date_default_timezone_set('America/New_York'); // Set the timezone to Eastern Time
+
+                    // Get the current date in 'YYYYMMDD' format
+                        $getCurrentEstDate = (new DateTime())->format('D M jS, Y');
+                        $displayCurrentEstDate = $getCurrentEstDate;
+                  ?>
+```
+
+---
+
+6. x

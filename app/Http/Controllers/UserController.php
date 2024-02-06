@@ -33,7 +33,7 @@ class UserController extends Controller
     }
 
 // &&& #DCT &&& #############################################################################################################
-    public function showEnrollForm(){
+    public function showEnrollUserForm(){
         //Logged in user can register another user:
             if (auth()->check()) {
                 $hardCodedMessage = '';
@@ -43,6 +43,23 @@ class UserController extends Controller
                 $hardCodedMessage = 'Go ahead and register as a guest.';
                 return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
                 return view('homepage-enroll')->with('failure', 'Go ahead and register as guest...');
+                return redirect('/')->with('failure', 'You do not have the permissions to create a patient account.');
+
+            }  
+    }
+
+//Added Enroll user route for logged in user admin panel short cut (2/5/2024)
+    public function showEnrollPatientForm(){
+               //Logged in user can register another user:
+               if (auth()->check()) {
+                // $hardCodedMessage = '';
+                // return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
+                return view('homepage-enroll-patient');
+            } else {
+        // redirect back to GUEST homepage: (let guest create the first user)
+                // $hardCodedMessage = 'Go ahead and register as a guest.';
+                // return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
+                // return view('homepage-enroll')->with('failure', 'Go ahead and register as guest...');
                 return redirect('/')->with('failure', 'You do not have the permissions to create a patient account.');
 
             }  

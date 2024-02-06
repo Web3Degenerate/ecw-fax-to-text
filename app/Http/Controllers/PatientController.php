@@ -33,7 +33,7 @@ class PatientController extends Controller
         $patient->mrn = $request->input('mrn'); 
         // $patient->dob = $request->input('dob'); 
         $patient->referring_provider = $request->input('referring_provider'); 
-
+        $patient->em_date = $request->input('em_date');
 
                 $currentDateInEST = Carbon::now('America/New_York');
                 // $formattedDate = $currentDateInEST->format('Y-m-d H:i:s');
@@ -64,6 +64,8 @@ class PatientController extends Controller
         // $patient->unique_days = '0'; // query notes table within date range.
         // $patient->status = 0; // 0 is active, 1 is inactive
 
+       
+
         $patient->save();   
 
 
@@ -73,15 +75,22 @@ class PatientController extends Controller
         
 // Success message worked, hardCodedMessage did not ($guestMessage):
         // return back()->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program.', ['guestMessage' => $hardCodedMessage]);
-        return back()->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program (in patients table).');
+        // return back()->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program (in patients table).');
+        return redirect('/')->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been enrolled in the Online Digital E-M program (in patients table).');
     }
 
 
 //Just like UserController@profile(User $pizza)in the get('/profile/{pizza:username}' route
 // THE VARIABLE '$pizza' or '$mrn' IS the entire patient (or user) OBJECT. So to get mrn in this case, it's $mrn->mrn:
-    public function viewPatient(Patient $mrn){
-        $getPatient = Patient::where('mrn', $mrn->mrn)->firstOrFail();
-        return view('profile-patient', ['patient' => $getPatient]);
+    public function viewPatient($id){
+        // $getPatient = Patient::where('mrn', $mrn->mrn)->firstOrFail();
+        $getPatient = Patient::find($id);
+        $getAllPtNotes = Note::where('patient_id', $id)->get();
+
+        $getPendingPtNotes = Note::where('patient_id', $id)->where('billing_status_string', 'pending')->get();
+        $allTime = $getPendingPtNotes->sum('clinic_time');
+
+        return view('profile-patient', ['patient' => $getPatient, 'notes' => $getAllPtNotes, 'totalTime' => $allTime]);
     }
 
 

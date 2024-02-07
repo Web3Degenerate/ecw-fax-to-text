@@ -66,9 +66,9 @@ class NoteController extends Controller
             //     $sStartDate = $startDateObj->format('Ymd');
 
             // Get the current date in 'YYYYMMDD' format
-                // $currentDate = Carbon::now()->format('Ymd');
+                $currentDate = Carbon::now()->format('Ymd');
 
-                $currentDate = Carbon::now('America/New_York')->format('Ymd');
+                // $currentDate = Carbon::now('America/New_York')->format('Ymd');
                 $sEndDate = $currentDate;
 //For testing, set sEndDate to hardcoded 2/3/2023
         // $sEndDate = '20240203';
@@ -240,13 +240,15 @@ class NoteController extends Controller
                             }
 
                             // return view('fax-inbox')->with('success', 'Faxes Updated.');
-                            $notes = Note::all();
+                            // $notes = Note::all();
+                            $notes = Note::orderBy('id', 'desc')->get();
                             $hardCodedMessage = 'Success! New faxes have been updated';
                             $displayBox = "alert alert-success text-center";
                             return view('fax-inbox', ['faxMessage' => $hardCodedMessage, 'notes' => $notes, 'displayBox' => $displayBox]);
                     } else {
                         // $faxData = '';
-                        $notes = Note::all();
+                        // $notes = Note::all();
+                        $notes = Note::orderBy('id', 'desc')->get();
                         $hardCodedMessage = 'No new faxes have been received';
                         $displayBox = "alert alert-danger text-center";
                         return view('fax-inbox', ['faxMessage' => $hardCodedMessage, 'notes' => $notes, 'displayBox' => $displayBox]);
@@ -307,6 +309,14 @@ class NoteController extends Controller
             $get_pt_dob = $request->input('dob');
             $get_pt_referring_provider = $request->input('referring_provider');
 
+            $patient_em_date_input = $request->input('em_date_iso');
+
+            if($patient_em_date_input != '0911-09-11' && $patient_em_date_input != null){
+                $get_pt_em_date = $patient_em_date_input;
+            }else{
+                $get_pt_em_date = '';
+            }
+
 
          //firstOrCreate vs (v10.20) new createOrfirst: https://laravel-news.com/firstorcreate-vs-createorfirst
         // FROM StackOverFlow: https://stackoverflow.com/questions/25178464/first-or-create
@@ -315,7 +325,8 @@ class NoteController extends Controller
         ], [
             'name' => $get_pt_name,
             'dob' => $get_pt_dob,
-            'referring_provider' => $get_pt_referring_provider
+            'referring_provider' => $get_pt_referring_provider,
+            'em_date' => $get_pt_em_date
         ]);
 // Get dateTime stamp: 
 
@@ -454,8 +465,11 @@ class NoteController extends Controller
     // }
 
 
+    // $patient_em_date_input = $request->input('em_date_iso');  //moved 'em_date_iso' to create user check above
+    if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
+        $patient_em_date = $patient_em_date_input;
+    }
 
-    $patient_em_date = $findPatient->em_date;
 
     if ($patient_em_date) {
         // Convert the patient_em_date string to a Carbon instance

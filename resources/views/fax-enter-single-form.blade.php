@@ -146,6 +146,17 @@
                         </div>
 
 
+    {{-- Date Time Formatted as datetime-local (iso) WITHOUT time zone --}}
+                <div class="form-group">
+                    <label for="em_date_iso" class="text-muted mb-1"><small>Date of Last E-M Visit:</small></label>
+                    {{-- <input value="{{old('note_date_time_formatted')}}" name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="text" autocomplete="off" /> --}}
+                    <input value="{{old('em_date_iso')}}" name="em_date_iso" id="patient-em-date-iso" class="form-control" type="date" autocomplete="off" />
+                    @error('em_date_iso')
+                    <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                    @enderror
+                </div>
+
+
                         <div class="form-group">
                             <label for="note_body" class="text-muted mb-1"><small>Note Text:</small></label>
                             <textarea id="note-body" name="note_body" rows="4" class="form-control">
@@ -232,7 +243,10 @@
                 const patientDateTimeStamp = document.getElementById('patient-dateTime-stamp-string');
                 const patientDateTimeStampStandardized = document.getElementById('patient-dateTime-stamp-string-standardized');
                 const patientDateTimeStampFormatted = document.getElementById('patient-dateTime-stamp-formatted');
+
                 const patientDateTimeStampIso = document.getElementById('patient-dateTime-stamp-iso');
+                const patientEmDateIso = document.getElementById('patient-em-date-iso');
+
                 
                 const patientClinicTime = document.getElementById('patient-clinic-time');
                 
@@ -495,6 +509,149 @@
                     //"Working" for time stamps:                
                                     // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)/g; //Attempts to grab last name and falty time stamps.
                     
+
+
+                    // *********** PATIENT LAST EM VISIT **************************88
+                        // 1 - Copy clinic_time pattern. Look for date. 
+
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))[^]*?(?:Date: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))/;
+                        //2. Hard stop when reaches 'Date:' or 'Provider'
+                            const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))(?:(?!Date:|Provider).)*?(?:Date: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))/;
+
+                            //2. Hard stop "specifically" to Date:
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))\s*[^]*?(?:Date:)/;
+
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))\s*[^]*?(?=\/Date:)/;
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))).*\/Date:/;
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*? (?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))(?:Date:|Provider\.)/;
+                            //                       /(?:AM|am|PM|pm)>[^]*? (\d+)\s*(?:minutes)?[^]*?(?:Date: \d{2}\/\d{2}\/\d{4}|Provider\.)/
+
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})(?:(?!Date:|Provider).)*/;
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})(?:(?!Date:|Provider)[^])*?(?:Date: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))/;
+
+
+                            const emDateMatch = text.match(emDatePattern);
+                            console.log("emDateMatch #match returned: ", emDateMatch)
+
+                            // const displayEmDate = emDateMatch ? emDateMatch[1] || emDateMatch[2] || emDateMatch[3] : '';
+//***** TRIM TEST FOR EM DATE **************************************************************************************//
+
+
+//***** EM DATE Version 3.0 (Active 2/7/2024) **************************************************************************************//
+                                
+
+
+                        if (emDateMatch) {
+                            // Trim at 'Date:' or 'Provider'
+                            const trimmedMatchEm = emDateMatch[0].split(/Date:|Provider/)[0].trim();
+                            console.log("Trimmed match: ", trimmedMatchEm);
+
+                            // Regular expression to match 'MM/DD/YYYY' or 'MM-DD-YYYY'
+                            const datePatternEm = /(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/;
+
+                            const matchDateEm = trimmedMatchEm.match(datePatternEm);
+
+                                if (matchDateEm) {
+                                    const displayEmDate = matchDateEm[1];
+                                    console.log("displayEmDate searching #trimmedMatchEm returned: ", displayEmDate);
+
+                                    const dateObjectEm = new Date(displayEmDate); // Parse the date string
+                                    const formattedDateEm = dateObjectEm.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                                    patientEmDateIso.value = formattedDateEm;
+                                } else {
+                                    // console.error('Error: Date Not Found');
+                                        fakeDate = '0911-09-11';
+                                        const dateObjectEmFake = new Date(fakeDate); // Parse the date string
+                                        const formattedDateEmFake = dateObjectEmFake.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                                        patientEmDateIso.value = formattedDateEmFake;
+                                        // patientEmDateIso.vaue = '0911-09-11';
+                                        console.error('Error: Patient Last EM Visit Not Found. formattedDateEmFake used instead: ', formattedDateEmFake);
+                                } 
+                    } else {
+                        console.error('Error: No #emDateMatch match found on outter if check: ', emDateMatch);
+                    }
+
+// version 2 **********************************************************************
+                            //         const displayEmDate = emDateMatch[1] || emDateMatch[2] || emDateMatch[3];
+
+                            //             if (displayEmDate) {
+                            //                 console.log("displayEmDate match returned: ", displayEmDate);
+                            //                 const dateObjectEm = new Date(displayEmDate); // Parse the date string
+                            //                 const formattedDateEm = dateObjectEm.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                            //                 patientEmDateIso.value = formattedDateEm;
+                            //             } else {
+                            //                 // console.error('Error: Date Not Found');
+                            //                 fakeDate = '0911-09-11';
+                            //                 const dateObjectEmFake = new Date(fakeDate); // Parse the date string
+                            //                 const formattedDateEmFake = dateObjectEmFake.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                            //                 patientEmDateIso.value = formattedDateEmFake;
+                            //                 // patientEmDateIso.vaue = '0911-09-11';
+                            //                 console.error('Error: Date Not Found');
+                            //             }
+                            // } else {
+                            //     console.error('Error: No #emDateMatch match found on outter if check: ', emDateMatch);
+                            // }
+
+
+
+
+//***** EM DATE Version 2.0: Gets trimmedMatch but doesn't use it **************************************************************************************//
+
+                            // if (emDateMatch) {
+                            //     // Trim at 'Date:' or 'Provider'
+                            //     const trimmedMatch = emDateMatch[0].split(/Date:|Provider/)[0].trim();
+                            //     console.log("Trimmed match: ", trimmedMatch);
+
+                            //     const displayEmDate = emDateMatch[1] || emDateMatch[2] || emDateMatch[3];
+
+                            //     if (displayEmDate) {
+                            //         console.log("displayEmDate match returned: ", displayEmDate);
+                            //         const dateObjectEm = new Date(displayEmDate); // Parse the date string
+                            //         const formattedDateEm = dateObjectEm.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                            //         patientEmDateIso.value = formattedDateEm;
+                            //     } else {
+                            //         // console.error('Error: Date Not Found');
+                            //         fakeDate = '0911-09-11';
+                            //         const dateObjectEmFake = new Date(fakeDate); // Parse the date string
+                            //         const formattedDateEmFake = dateObjectEmFake.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                            //         patientEmDateIso.value = formattedDateEmFake;
+                            //         // patientEmDateIso.vaue = '0911-09-11';
+                            //         console.error('Error: Date Not Found');
+                            //     }
+                            // } else {
+                            //     console.error('Error: No #emDateMatch match found on outter if check: ', emDateMatch);
+                            // }
+
+
+//***** EM DATE Version 1.0 **************************************************************************************//
+
+                            // if (displayEmDate) {
+                            //     console.log("displayEmDate match returned: ", displayEmDate)
+                            //     const dateObjectEm = new Date(displayEmDate); // Parse the date string
+                            //     const formattedDateEm = dateObjectEm.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                            //     patientEmDateIso.value = formattedDateEm;
+                            // } else {
+                            //     fakeDate = '0911-09-11';
+                            //     const dateObjectEmFake = new Date(fakeDate); // Parse the date string
+                            //     const formattedDateEmFake = dateObjectEmFake.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                            //     patientEmDateIso.value = formattedDateEmFake;
+                            //     // patientEmDateIso.vaue = '0911-09-11';
+                            //     console.error('Error: Date Not Found');
+                            // }
+                            
+                            // // patientEmDateIso.value = `${displayEmDate}`;
+                            //   console.log('EM Date:', displayEmDate);
+
+//***** END OF EM DATE MATCHING  **************************************************************************************//
+
                     
             //Attempting to get timestamps and minutes in one swoop: 
                                     // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)/gs;
@@ -579,3 +736,43 @@
     
     
     </x-faxlayout>
+
+
+
+    // [
+    // 0: "PM>7 mins Date: 01/26/2024 Time: 11:27 PM Provider: Bates, Vernice   01/26/2024 Note generatedbyeClinicalWorks EVR/PMSoftware (vvweveClinicalWorks.corn)  To: TCD Medical PLLC, Subject: Progress Notes, Fax#: (716)303-7012,   SendDate:",
+    // 1: "01/26/2024",
+    // 2: null
+    // ]
+
+
+//**** EXAMPLE OF NO EM-DATE FROM:  http://127.0.0.1:8000/manually-enter-single-fax-form/1245045912  *********************//
+
+// [
+//     0: "PM>7 mins Date: 01/26/2024 Time: 11:27 PM Provider: Bates, Vernice   01/26/2024 Note generatedbyeClinicalWorks EVR/PMSoftware (vvweveClinicalWorks.corn)  To: TCD Medical PLLC, Subject: Progress Notes, Fax#: (716)303-7012,   SendDate: 01/26/2024",
+//     1: "01/26/2024",
+//     2: null,
+//     3: "01/26/2024"
+// ]
+
+// [
+//     [0]: "Bates, Vernice Telephone Encounter Answered by   Bates, Vemice Action Taken   Bates, Vernice 01/26/202411:26:13 PM>7 mins Date: 01/26/2024 Time: 11:27 PM Provider: Bates, Vernice   01/26/2024 Note generatedbyeClinicalWorks EVR/PMSoftware (vvweveClinicalWorks.corn)  To: TCD Medical PLLC, Subject: Progress Notes, Fax#: (716)303-7012,   SendDate: 01/26/2024 11:27:26 AM,   page In [-ulg2.4.1.17in] ",
+//     [1]: "01/26/202411:26:13 PM>",
+//     [2]: "7 mins Date: 01/26/2024 Time: 11:27 PM Provider: Bates, Vernice   01/26/2024 Note generatedbyeClinicalWorks EVR/PMSoftware (vvweveClinicalWorks.corn)  To: TCD Medical PLLC, Subject: Progress Notes, Fax#: (716)303-7012,   SendDate: 01/26/2024 11:27:26 AM,   page In [-ulg2.4.1.17in] "
+// ]
+
+
+//**** EXAMPLE OF EM-DATE INCLUDED FROM: http://127.0.0.1:8000/manually-enter-single-fax-form/1250113784   *********************//
+
+// [
+//     "AM>Enter sour time and the date of last E-Mvist in the lines below: >Total Mnutes   16 >Last E-M-DOS: (as \"MVI-DD-YYYY\" )   1/21/2024 >end of time entry. Please do not write after this line. > II Date: 02/07/2024",
+//     null,
+//     "1/21/2024",
+//     "02/07/2024"
+// ]
+
+// [
+//     [0]: "Bates, Vernice Telephone Encounter Answered by   Bates, Vemice Action Taken   Bates, Vernice 02/07/2024 01:53:20 AM>Enter sour time and the date of last E-Mvist in the lines below: >Total Mnutes   16 >Last E-M-DOS: (as \"MVI-DD-YYYY\" )   1/21/2024 >end of time entry. Please do not write after this line. > II Date: 02/07/2024 Time: 01:45 AM Provider: Bates, Vernice   02/07/2024 Note generatedbyeClinicalWorks EVR/PMSoftware (vvweveClinicalWorks.corn) To: TCD Medical PLLC, Subject: Progress Notes, Fax#: (716)303-7012,   SendDate: 02/07/202401:54:11 AM,   page In [-ulg2.4.1.17in] ",
+//     [1]: "02/07/2024 01:53:20 AM>",
+//     [2]: "Enter sour time and the date of last E-Mvist in the lines below: >Total Mnutes   16 >Last E-M-DOS: (as \"MVI-DD-YYYY\" )   1/21/2024 >end of time entry. Please do not write after this line. > II Date: 02/07/2024 Time: 01:45 AM Provider: Bates, Vernice   02/07/2024 Note generatedbyeClinicalWorks EVR/PMSoftware (vvweveClinicalWorks.corn) To: TCD Medical PLLC, Subject: Progress Notes, Fax#: (716)303-7012,   SendDate: 02/07/202401:54:11 AM,   page In [-ulg2.4.1.17in] "
+// ]

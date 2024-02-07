@@ -134,6 +134,7 @@ Route::post('/manually-get-fax-update', [NoteController::class, 'manuallyGetFaxU
 
 // &&& #DCT &&& - Manually create a new PATIENT in the patient table
 Route::post('/register-new-online-digitial-em-patient', [PatientController::class, 'manuallyRegisterNewPatient']);
+Route::post('/edit-online-digitial-em-patient', [PatientController::class, 'updatePatient']);
 
 // &&& #DCT &&& - view patient Dashboard
 // Route::get('/profile/{pizza:username}', [UserController::class, 'profile']);
@@ -141,7 +142,7 @@ Route::post('/register-new-online-digitial-em-patient', [PatientController::clas
 Route::get('/hub/{id}', [PatientController::class, 'viewPatient']);
 
 // &&& #DCT &&& - #ToDo - Add edit page and route: 
-Route::get('/edit-patient/{patient:mrn}', [PatientController::class, 'editPatient']);
+Route::get('/edit-patient/{id}', [PatientController::class, 'editPatient']);
 
 
 // ****************************** PATIENT HUB RELATED ROUTES (BORROWED FROM "PROFILE RELATED ROUTES" ********************************************//

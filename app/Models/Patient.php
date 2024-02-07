@@ -13,7 +13,7 @@ class Patient extends Model
 
     protected $fillable = ['name', 'mrn', 'dob', 'referring_provider', 'billing_index_start_date', 'billing_index_end_date', 
                             'billing_index_start_number', 'billing_index_end_number', 'fax_image_link', 'unique_days', 'status',
-                            'clinic_time_counter'];
+                            'clinic_time_counter', 'em_date'];
 
 
 // SEE (Video 30: 9:20) - https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview

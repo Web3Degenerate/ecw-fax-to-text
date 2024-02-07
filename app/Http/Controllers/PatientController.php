@@ -80,6 +80,31 @@ class PatientController extends Controller
     }
 
 
+// Save pt edit changes (2/6/2024) 
+    public function updatePatient(Request $request){
+        if (auth()->check()) {
+            $userID = $request->input('patient_id');
+
+            // $updatePatient = Patient::find($request->input('patient_id'));
+            $updatePatient = Patient::find($userID);
+
+            $updatePatient->name = $request->input('name');
+            $updatePatient->mrn = $request->input('mrn');
+            $updatePatient->referring_provider = $request->input('referring_provider');
+            $updatePatient->em_date = $request->input('em_date');
+
+            $updatePatient->save(); 
+
+            $displayPatientName = $request->input('name');
+            $displayPatientMRN = $request->input('mrn');
+
+             return redirect('/hub/'.$userID)->with('success', 'Patient ' . $displayPatientName . ' (' . $displayPatientMRN . ') has been updated.');
+        } else {
+            return redirect('/')->with('failure', 'You do not have the permissions to edit a patient account.');
+        } 
+    }
+
+
 //Just like UserController@profile(User $pizza)in the get('/profile/{pizza:username}' route
 // THE VARIABLE '$pizza' or '$mrn' IS the entire patient (or user) OBJECT. So to get mrn in this case, it's $mrn->mrn:
     public function viewPatient($id){
@@ -92,6 +117,20 @@ class PatientController extends Controller
 
         return view('profile-patient', ['patient' => $getPatient, 'notes' => $getAllPtNotes, 'totalTime' => $allTime]);
     }
+
+
+//2/6/2024 - Edit patient view
+public function editPatient($id){
+    //Logged in user can register another user:
+    if (auth()->check()) {
+     // $hardCodedMessage = '';
+     // return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
+     $getPatient = Patient::find($id);
+     return view('profile-edit-patient', ['patient' => $getPatient]);
+ } else {
+     return redirect('/')->with('failure', 'You do not have the permissions to edit a patient account.');
+ }  
+}
 
 
     // *** ~(2:40) - Set up view for individual patient view: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview

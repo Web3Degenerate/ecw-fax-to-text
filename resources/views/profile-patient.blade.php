@@ -19,7 +19,7 @@
 {{-- (3:40) - Add (at)auth wrapper around form--}}
     @auth
 
-    <a href="/hub/{{ $patient->mrn }}/edit-patient" class="btn btn-primary btn-sm">Edit Patient {{ $patient->name }}<i class="fas fa-user-plus"></i></a>
+    <a href="/edit-patient/{{ $patient->id }}" class="btn btn-primary btn-sm">Edit Patient {{ $patient->name }}<i class="fas fa-user-plus"></i></a>
     @endauth
         </h2>
   
@@ -44,11 +44,11 @@
       <div class="list-group">
         @foreach($notes as $note)
             @if($note->billing_status_string == 'invalid')
-                <a href="/hub/{{ $note->id }}" class="list-group-item list-group-item-action" style='background-color: red; color:white'>
+            <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action" style='background-color: red; color:white'>
             @elseif($note->billing_status_string == 'pending')
-              <a href="/hub/{{ $note->id }}" class="list-group-item list-group-item-action" style="background:#33ff77">
+              <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action" style="background:#33ff77">
             @else
-                <a href="/hub/{{ $note->id }}" class="list-group-item list-group-item-action">
+              <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action">
             @endif
                     <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
                     {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
@@ -61,7 +61,7 @@
                     This note was entered {{ Carbon\Carbon::parse($note->date_time)->diffInDays($patient->em_date) }} days from the last EM vist. 
                     @endif
                     <br>
-                    Note Status: {{ $note->billing_status_string }}
+                    Note Status: {{ $note->billing_status_string ?? 'N/A' }}
                 </a>
             {{-- @endif --}}
         @endforeach

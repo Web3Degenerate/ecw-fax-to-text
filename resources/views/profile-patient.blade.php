@@ -44,24 +44,49 @@
       <div class="list-group">
         @foreach($notes as $note)
             @if($note->billing_status_string == 'invalid')
-            <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action" style='background-color: red; color:white'>
+            <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action" style='background-color: #DF7968; color:white'>
             @elseif($note->billing_status_string == 'pending')
               <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action" style="background:#33ff77">
+            @elseif($note->billing_status_string == 'check')
+                <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action" style="background:#E3F443">           
             @else
               <a href="{{ url('/manually-enter-single-fax-form/'.$note->fax_details_id) }}" class="list-group-item list-group-item-action">
             @endif
                     <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
                     {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
-                    <strong> On {{ $note->date_time }} ({{ $note->note_provider }})</strong> spent a total of {{ $note->clinic_time }} total minutes.
-                    <br>
-                    Last EM Visit: {{$patient->em_date ?? 'Not set'}} 
+                    {{-- {{ $note->date_time }} --}}
+                    
+                    <strong> On {{ \Carbon\Carbon::parse($note->date_time)->format('m/d/Y g:i A') }} ({{ $note->note_provider }})</strong> spent a total of {{ $note->clinic_time }} total minutes.
+                    <br><br>
+                    {{-- {{$patient->em_date ?? 'Not set'}} --}}
+                    @if($patient->em_date)
+                      Last EM Visit:  {{ \Carbon\Carbon::parse($patient->em_date)->format('l, F jS, Y') }}
+                    @else
+                      Last EM Visit:  <b>Last E-M Visit has not been reported for patient {{ $patient->name }} ({{ $patient->mrn }})</b>
+                    @endif
 
-                    @if($patient->em_date) 
                     <br>
+                    @if($patient->em_date) 
+                    {{-- <br> --}}
                     This note was entered {{ Carbon\Carbon::parse($note->date_time)->diffInDays($patient->em_date) }} days from the last EM vist. 
                     @endif
-                    <br>
-                    Note Status: {{ $note->billing_status_string ?? 'N/A' }}
+                    {{-- <br> --}}
+                    <?php
+                        if($note->billing_status_string){
+                            if($note->billing_status_string == 'pending'){
+                              $display_note_status = "There is no conflict with a recent E-M visit. This note is eligible for billing.";
+                            }elseif($note->billing_status_string == 'invalid'){
+                              $display_note_status = "This note is within 7 days of an E-M visit. This note is not eligible for billing.";
+                            }elseif($note->billing_status_string == 'check'){
+                              $display_note_status = "We do not have an E-M visit date on record. Please check for any possible E-M visit conflicts before billing.";
+                            }else{
+                              $display_note_status = '';
+                            }
+                        }else{
+                          $display_note_status = '';
+                        }
+                    ?>
+                    <b>Note Status:</b> {{ $display_note_status }}
                 </a>
             {{-- @endif --}}
         @endforeach

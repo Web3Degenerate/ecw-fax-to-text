@@ -110,9 +110,17 @@ class PatientController extends Controller
     public function viewPatient($id){
         // $getPatient = Patient::where('mrn', $mrn->mrn)->firstOrFail();
         $getPatient = Patient::find($id);
-        $getAllPtNotes = Note::where('patient_id', $id)->get();
 
-        $getPendingPtNotes = Note::where('patient_id', $id)->where('billing_status_string', 'pending')->get();
+        // $getAllPtNotes = Note::where('patient_id', $id)->get();
+        $getAllPtNotes = Note::where('patient_id', $id)
+            ->orderBy('date_time', 'desc')
+            ->get();
+
+        // $getPendingPtNotes = Note::where('patient_id', $id)->where('billing_status_string', 'pending')->get();
+        $getPendingPtNotes = Note::where('patient_id', $id)
+            ->whereIn('billing_status_string', ['pending', 'check'])
+            ->get();
+
         $allTime = $getPendingPtNotes->sum('clinic_time');
 
         return view('profile-patient', ['patient' => $getPatient, 'notes' => $getAllPtNotes, 'totalTime' => $allTime]);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Follow;
 use App\Models\Patient;
+use App\Models\Note;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\View;
@@ -21,6 +22,23 @@ class UserController extends Controller
 
             $users = User::all();
             $patients = Patient::all();
+
+            foreach($patients as $patient){
+                
+                $getPendingPtNotes = Note::where('patient_id', $patient->id)
+                ->whereIn('billing_status_string', ['pending', 'check'])
+                ->get();
+
+                $getPendingTime = $getPendingPtNotes->sum('clinic_time');
+                // if($getPendingTime){
+
+                    $updatePatientTime = Patient::find($patient->id);
+                    $updatePatientTime->clinic_time_counter = $getPendingTime;
+                    $updatePatientTime->save();
+                // }
+
+            }
+
             return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients]);
             // return 'you are logged in'; 
         } else {

@@ -114,4 +114,25 @@
 
 ---
 
-6. x
+6. In Laravel View, we can format dates by using Carbon in the Laravel directive.
+    - dateTime example: `{{ \Carbon\Carbon::parse($note->date_time)->format('m/d/Y g:i A') }}` like `01/21/2024 4:38 PM`
+    - date example: `Last EM Visit:  {{ \Carbon\Carbon::parse($patient->em_date ?? 'Not set')->format('l, F jS, Y') }}` like `Sunday, January 21st, 2024`
+
+```php
+// Format date YYYY-MM-DD in the format Weekday, Month, Day(th/st) and Year.
+<strong> On {{ \Carbon\Carbon::parse($note->date_time)->format('m/d/Y g:i A') }} ({{ $note->note_provider }})</strong> spent a total of {{ $note->clinic_time }} total minutes.
+
+// Format dateTime as MM/DD/YYYY H:MM AM/PM:
+    // I guess you can't optionally set the parse param like '$patient->em_date ?? 'Not Set''
+    // Last EM Visit:  {{ \Carbon\Carbon::parse($patient->em_date ?? 'Not set')->format('l, F jS, Y') }}
+    Last EM Visit:  {{ \Carbon\Carbon::parse($patient->em_date)->format('l, F jS, Y') }}
+
+```
+
+7. You can also use Carbon to subtract the the number of days between two dates:
+    - `This note was entered {{ Carbon\Carbon::parse($note->date_time)->diffInDays($patient->em_date) }} days from the last EM vist. `
+
+```php
+This note was entered {{ Carbon\Carbon::parse($note->date_time)->diffInDays($patient->em_date) }} days from the last EM vist.
+
+```

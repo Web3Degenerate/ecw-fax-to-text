@@ -39,7 +39,7 @@
                             <a href="/hub/{{ $patient->id }}" class="list-group-item list-group-item-action">
                                 <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
                                 {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
-                                <strong>{{ $patient->name }} ({{ $patient->mrn }})</strong> has XX total minutes. (last EM Visit: {{$patient->em_date ?? 'Not set'}})
+                                <strong>{{ $patient->name }} ({{ $patient->mrn }})</strong> has {{ $patient->clinic_time_counter ?? '0' }} total minutes. (last EM Visit: {{$patient->em_date ?? 'Not set'}})
                             </a>
                         @endif
                       @endif

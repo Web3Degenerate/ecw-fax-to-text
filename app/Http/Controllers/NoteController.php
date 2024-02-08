@@ -321,7 +321,7 @@ class NoteController extends Controller
             if($patient_em_date_input != '0911-09-11' && $patient_em_date_input != null){
                 $get_pt_em_date = $patient_em_date_input;
             }else{
-                $get_pt_em_date = '';
+                $get_pt_em_date = null;
             }
 
 
@@ -482,7 +482,7 @@ class NoteController extends Controller
 
     if ($patient_em_date) {
         // Convert the patient_em_date string to a Carbon instance
-        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(7);
+        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
     
         // Get current note date
             $get_note_date_timerz = $request->input('note_date_time_iso');

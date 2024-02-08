@@ -241,14 +241,16 @@ class NoteController extends Controller
 
                             // return view('fax-inbox')->with('success', 'Faxes Updated.');
                             // $notes = Note::all();
-                            $notes = Note::orderBy('id', 'desc')->get();
+                            // $notes = Note::orderBy('id', 'desc')->get();
+                            $notes = Note::orderBy('date_time_fax_received', 'desc')->get();
                             $hardCodedMessage = 'Success! New faxes have been updated';
                             $displayBox = "alert alert-success text-center";
                             return view('fax-inbox', ['faxMessage' => $hardCodedMessage, 'notes' => $notes, 'displayBox' => $displayBox]);
                     } else {
                         // $faxData = '';
                         // $notes = Note::all();
-                        $notes = Note::orderBy('id', 'desc')->get();
+                            // $notes = Note::orderBy('id', 'desc')->get();
+                            $notes = Note::orderBy('date_time_fax_received', 'desc')->get();
                         $hardCodedMessage = 'No new faxes have been received';
                         $displayBox = "alert alert-danger text-center";
                         return view('fax-inbox', ['faxMessage' => $hardCodedMessage, 'notes' => $notes, 'displayBox' => $displayBox]);
@@ -301,6 +303,11 @@ class NoteController extends Controller
 
 // ************ UPDATE OR CREATE NOTE FROM MANUAL FAX FORM ******************************************//
     
+    //#yolo 2/7/24
+    // private function internalUpdatePatientEMDate($id){
+
+    // }
+
     public function createNoteFromManualFaxForm(Request $request){
 
         // $getPatient = Patient::find($request->input('mrn'));
@@ -468,16 +475,19 @@ class NoteController extends Controller
     // $patient_em_date_input = $request->input('em_date_iso');  //moved 'em_date_iso' to create user check above
     if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
         $patient_em_date = $patient_em_date_input;
+    }else{
+        $patient_em_date = $findPatient->em_date; //get last em_date on file or return null. 
     }
 
 
     if ($patient_em_date) {
         // Convert the patient_em_date string to a Carbon instance
-        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
+        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(7);
     
-        $get_note_date_timerz = $request->input('note_date_time_iso');
-        $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
-        $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+        // Get current note date
+            $get_note_date_timerz = $request->input('note_date_time_iso');
+            $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+            $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
     
         // Compare the Carbon instances
         if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
@@ -511,6 +521,15 @@ class NoteController extends Controller
         $note->save();   
         //******************* END OF CREATE NOTE  *************************** */           
 
+// Quickly update patient em_date if valid one provided
+    if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
+        // $patient_em_date = $patient_em_date_input;
+
+        //I guess we'll just go ahead and update the newly provided pt em_date on the Patient DB. 
+        $update_patient_em_date = Patient::find($findPatient->id);
+        $update_patient_em_date->em_date = $patient_em_date_input;
+        $update_patient_em_date->save();
+    }
 
         //****************** START OF UpdateOrCreate an Invoice object ********* */
 

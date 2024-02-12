@@ -39,6 +39,34 @@ class UserController extends Controller
 
             }
 
+// Thu 2/8/2023 Update all patient Invoices from last 'pending' or 'check' note:
+            foreach($patients as $patient){
+
+                $oldestPendingNote = Note::where('patient_id', $patient->id)
+                    ->whereIn('billing_status_string', ['pending', 'check'])
+                    ->orderBy('date_only', 'asc')
+                    ->first();
+
+                    if ($oldestPendingNote) {
+                        // Set start date
+                        $invoice_start_date = $oldestPendingNote->date_only;
+                    
+                        // Calculate end date (7 days in the future)
+                        $invoice_end_date = Carbon::parse($invoice_start_date)->addDays(7)->toDateString();
+
+                        // $this->invoiceChecker();
+                    } 
+    //Do I need the else clause? 
+                    else {
+                        // Handle the case where no note is found
+                        $invoice_start_date = null;
+                        $invoice_end_date = null;
+                    }
+
+            }
+
+
+
             return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients]);
             // return 'you are logged in'; 
         } else {

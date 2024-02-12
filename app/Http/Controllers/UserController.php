@@ -48,32 +48,70 @@ class UserController extends Controller
                     ->first();
 
                     if ($oldestPendingNote) {
-                        // Set start date
+
+                        
+                        // Set start date:
                         $invoice_start_date = $oldestPendingNote->date_only;
                     
                         // Calculate end date (7 days in the future)
                         $invoice_end_date = Carbon::parse($invoice_start_date)->addDays(7)->toDateString();
 
-                        // $this->invoiceChecker();
+                       // Check if invoice_end_date is less than the current date in EST.
+                        $currentDateEST = Carbon::now('America/New_York')->toDateString();
+                        if ($invoice_end_date < $currentDateEST) {
+                            // The invoice group is in the past and both the Note and Invoice may be marked as completed. 
+                            $invoice_period_status = 'complete';
+                        } else {
+                            // The invoice group is current, and at least the Invoice should be marked as pending? 
+                            $invoice_period_status = 'pending';
+                        }
 
-                        //Get all notes in the invoice period:
+                    //Get all notes in the invoice period:
                         $notes_in_billing_period = Note::where('patient_id', $patient->id)
                             ->whereBetween('date_only', [$invoice_start_date, $invoice_end_date])
                             ->get();
 
-                        $check_clinic_time = $notes_in_billing_period->sum();
+                        $check_clinic_time = $notes_in_billing_period->sum('clinic_time');
+                     
+
+
                         if($check_clinic_time > 4){
 
+                        // Get the invoice_billing_number for this group by checking if oldest pending note has an billing_number, else create new #
+                            if($oldestPendingNote->billing_number){
+                                $invoice_billing_number = $oldestPendingNote->billing_number;
+                                $update_or_create_invoice = Invoice::find($invoice_billing_number); 
+                            }else{
+                                $update_or_create_invoice = new Invoice;
+                                $invoice_billing_number = $createNewInvoice->id;
+                            }
 
                             foreach($notes_in_billing_period as $note){
     
-                                // Sum the total clinic_time to identify what billing category it is in. 
-    
-    
+                                //get the note to update:
+                                $updateNote = Note::find($note->id);
+
+                                // Add billing_number to note
+                                $updateNote->billing_number = $invoice_billing_number;
+
+                                // Add period_complete or period_ending to Note and Invoice
+                                $updateNote->billing_status_string = $invoice_period_status;
+                                
                                 // update or create the note in the Invoices table:
                                 
+                                // Add time in invoice
+                                // $update_or_create_invoice->clinic_time = x;
+
                             }
-                            
+
+                        }else{
+                            if($invoice_period_status == 'complete'){
+                                // less than 4 minutes and 7 day window is closed, so mark as not billable: 
+                                
+                            }else{
+                                // Less than 4 minutes but 7 day window is still open: 
+
+                            }
                         }
 
                     } 

@@ -55,6 +55,27 @@ class UserController extends Controller
                         $invoice_end_date = Carbon::parse($invoice_start_date)->addDays(7)->toDateString();
 
                         // $this->invoiceChecker();
+
+                        //Get all notes in the invoice period:
+                        $notes_in_billing_period = Note::where('patient_id', $patient->id)
+                            ->whereBetween('date_only', [$invoice_start_date, $invoice_end_date])
+                            ->get();
+
+                        $check_clinic_time = $notes_in_billing_period->sum();
+                        if($check_clinic_time > 4){
+
+
+                            foreach($notes_in_billing_period as $note){
+    
+                                // Sum the total clinic_time to identify what billing category it is in. 
+    
+    
+                                // update or create the note in the Invoices table:
+                                
+                            }
+                            
+                        }
+
                     } 
     //Do I need the else clause? 
                     else {
@@ -63,7 +84,8 @@ class UserController extends Controller
                         $invoice_end_date = null;
                     }
 
-            }
+
+            } //end of pt foreach loop
 
 
 

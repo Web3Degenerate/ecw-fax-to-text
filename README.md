@@ -616,6 +616,15 @@ Route::get('/admins-only', function(){
 
 ---
 
+### git reset HEAD
+
+_When you have local changes you don't care about that are preventing you from git pulling down the most recent copy, you can force to ignore local changes and pull down the newest remote version._
+
+**To remove local uncommitted changes (even if staged) run these commands:** [From this Stackoverflow Article](https://stackoverflow.com/questions/1125968/how-do-i-force-git-pull-to-overwrite-local-files)
+
+-   `git reset --hard HEAD`
+-   `git pull`
+
 ---
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>

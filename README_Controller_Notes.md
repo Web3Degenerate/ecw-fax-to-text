@@ -86,6 +86,18 @@ $getPendingPtNotes = Note::where('patient_id', $id)
 
 ---
 
+5. Search between two dates with **whereBetween()**
+
+```php
+$notes_in_billing_period = Note::where('patient_id', $patient->id)
+    ->whereBetween('date_only', [$invoice_start_date, $invoice_end_date])
+    ->get();
+
+
+```
+
+---
+
 4. Just staging GPT question
 
 ```php

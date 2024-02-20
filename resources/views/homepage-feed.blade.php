@@ -33,20 +33,52 @@
       <hr>
           <div class="profile-slot-content">
                 <div class="list-group">
-                  @foreach($patients as $patient)
-                      @if($patient->status == 0)
-                        @if($patient->id != 1)
-                            <a href="/hub/{{ $patient->id }}" class="list-group-item list-group-item-action">
-                                <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
-                                {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
-                                <strong>{{ $patient->name }} ({{ $patient->mrn }})</strong> has {{ $patient->clinic_time_counter ?? '0' }} total minutes. (last EM Visit: {{$patient->em_date ?? 'Not set'}})
-                            </a>
+                    @foreach($patients as $patient)
+                        @if($patient->status == 0)
+                          @if($patient->id != 1)
+                              <a href="/hub/{{ $patient->id }}" class="list-group-item list-group-item-action">
+                                  <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
+                                  {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
+                                  <strong>{{ $patient->name }} ({{ $patient->mrn }})</strong> has {{ $patient->clinic_time_counter ?? '0' }} total minutes. (last EM Visit: {{$patient->em_date ?? 'Not set'}})
+                              </a>
+                          @endif
                         @endif
-                      @endif
-                  @endforeach
-                  {{-- <p>Hi from nested component x-profile</p> --}}
-                </div>
+                    @endforeach               
+                </div>            
           </div>
+
+
+
+      <ul>
+        @foreach($invoices as $invoice)
+            <li><strong>Invoice for Patient {{ $invoice->patient_id }} which began on ({{ $invoice->seven_days_from_date_only }})</strong> had billing code:  {{ $invoice->billing_code ?? 'Missed' }} for a total 
+              of {{ $invoice->cumulative_clinic_time }} minutes. (Invoice Status: {{$invoice->status ?? 'Missed'}} and billing_group_number is: {{ $invoice->billing_group_number ?? 'Missed'}}).</li>
+        @endforeach
+      </ul>
+
+
+          <hr>
+
+
+          <!-- <div class="profile-slot-content"> -->
+                <div class="list-group">
+                    @foreach($invoices as $invoice)
+                        <!-- @if($invoice->status == 0) -->
+                          <!-- @if($invoice->id != 1) -->
+                              <a href="/hub/{{ $invoice->id }}" class="list-group-item list-group-item-action">
+                                  <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
+                                  {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
+                                  <strong>Invoice for Patient {{ $invoice->patient_id }} which began on ({{ $invoice->seven_days_from_date_only }})</strong> had billing code:  {{ $invoice->billing_code ?? 'Missed' }} for a total 
+                                  of {{ $invoice->cumulative_clinic_time }} minutes. (Invoice Status: {{$invoice->status ?? 'Missed'}} and billing_group_number is: {{ $invoice->billing_group_number ?? 'Missed'}}).
+                              </a>
+                          <!-- @endif -->
+                        <!-- @endif -->
+                    @endforeach               
+                </div>            
+          <!-- </div> -->
+
+
+
  {{-- Closing div for outter parent row div --}}
   {{-- </div>  --}}
 </div>

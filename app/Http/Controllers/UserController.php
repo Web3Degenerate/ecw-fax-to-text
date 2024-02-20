@@ -10,6 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\View;
 
+use DB; 
+use Carbon\Carbon; 
+use App\Models\Invoice;
+
 class UserController extends Controller
 {
 
@@ -23,43 +27,54 @@ class UserController extends Controller
             $hardCodedMessage = '';
 
             $users = User::all();
-            $patients = Patient::all();
+            // $patients = Patient::all();
+            $patients = Patient::where('status',0)->get(); //get all active patients
+            
 
-               function calculateBillingCode($cumulativeClinicTime){
-                    if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
-                        return '99421';
-                    } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
-                        return '99422';
-                    } elseif($cumulativeClinicTime >= 21){
-                        return '99423';
-                    } else {
-                        return 'Online Digital E/M Billing Requirements Not Met';
-                    }
-                }
-
-            foreach($patients as $patient){
+            
+ 
+            // *** FIRST TEST TO SUM ALL PENDING NOTES AND UPDATE FIELD ON USER => clinic_time_counter **********//
+            // foreach($patients as $patient){        
+                //     // $getPendingPtNotes = Note::where('patient_id', $patient->id)
+                //     // ->whereIn('billing_status_string', ['pending', 'check'])
+                //     // ->get();
                 
-                $getPendingPtNotes = Note::where('patient_id', $patient->id)
-                ->whereIn('billing_status_string', ['pending', 'check'])
-                ->get();
-
-                $getPendingTime = $getPendingPtNotes->sum('clinic_time');
-                // if($getPendingTime){
-
-                    $updatePatientTime = Patient::find($patient->id);
-                    $updatePatientTime->clinic_time_counter = $getPendingTime;
-                    $updatePatientTime->save();
-                // }
-
-            }
-
-// Thu 2/8/2023 Update all patient Invoices from last 'pending' or 'check' note:
-            foreach($patients as $patient){
-
-                $oldestPendingNote = Note::where('patient_id', $patient->id)
-                    ->whereIn('billing_status_string', ['pending', 'check']) // 'in-billing'
-                    ->orderBy('date_only', 'asc')
-                    ->first();
+                //     $getPendingPtNotes = Note::where('patient_id', $patient->id)
+                //     ->whereIn('billing_status_string', ['pending', 'check'])
+                //     ->where('billing_status', 0) // Check that billing_status is equal to 0
+                //     ->get();
+                
+                //     $getPendingTime = $getPendingPtNotes->sum('clinic_time');
+                //     // if($getPendingTime){
+                    
+                    //         $updatePatientTime = Patient::find($patient->id);
+                    //         $updatePatientTime->clinic_time_counter = $getPendingTime;
+                    //         $updatePatientTime->save();
+                    //     // }
+                    // }
+                    // *** FIRST TEST TO SUM ALL PENDING NOTES AND UPDATE FIELD ON USER => clinic_time_counter **********//
+                    
+                    function calculateBillingCode($cumulativeClinicTime){
+                         if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
+                             return '99421';
+                         } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
+                             return '99422';
+                         } elseif($cumulativeClinicTime >= 21){
+                             return '99423';
+                         } else {
+                             return 'N/A';
+                         }
+                     }
+                    
+                    
+                    // Thu 2/8/2023 Update all patient Invoices from last 'pending' or 'check' note:
+                    foreach($patients as $patient){
+                        
+                        $oldestPendingNote = Note::where('patient_id', $patient->id)
+                        ->whereIn('billing_status_string', ['pending', 'check']) // 'in-billing'
+                        ->where('billing_status', 0) // Check that billing_status is equal to 0
+                        ->orderBy('date_only', 'asc')
+                        ->first();
 
                     if ($oldestPendingNote) {
 
@@ -93,30 +108,45 @@ class UserController extends Controller
                      
 
                         // Get the invoice_billing_number for this group by checking if oldest pending note has an billing_number, else create new #
-                                    if($oldestPendingNote->billing_number){
-                                        $invoice_billing_number = $oldestPendingNote->billing_number;
-                                        $update_or_create_invoice = Invoice::find($invoice_billing_number); 
-                                    }else{
-                                        $update_or_create_invoice = new Invoice;
-                                        $invoice_billing_number = $update_or_create_invoice->id;
-                                    }
+                        // if(!$oldestPendingNote->billing_number){
+                        if ($oldestPendingNote->billing_number !== null) {
+                            $invoice_billing_number = $oldestPendingNote->billing_number;
+                            $update_or_create_invoice = Invoice::find($invoice_billing_number); 
+                        }else{
+                            $update_or_create_invoice = new Invoice;
+                            $invoice_billing_number = $update_or_create_invoice->id;
+                        }
+                                                                  
+// $updateOldestPendingNote_billing_number = Note::find($oldestPendingNote->id);
+// $updateOldestPendingNote_billing_number->billing_number = $update_or_create_invoice->id;
+// $updateOldestPendingNote_billing_number->save();
+
+
                         // Get the invoice_billing_number for this group by checking if oldest pending note has an billing_number, else create new #
 
                         if($check_clinic_time > 4){
 
 // Update or Create Invoice ************************************************//
                         // update or create the note in the Invoices table:
-                            $update_or_create_invoice->patient_id = $note->patient_id;
+                            $update_or_create_invoice->patient_id = $patient->id;
                             $update_or_create_invoice->cumulative_clinic_time = $check_clinic_time;
 
-                        //probably get rid of seven days? Just set to invoice_end_date off oldestPendingNote
-                            $update_or_create_invoice->seven_days_from_date_only = $invoice_end_date;
+        //*********probably get rid of seven days? Just set to invoice_end_date off oldestPendingNote ***************//
+                            $update_or_create_invoice->seven_days_from_date_only = $invoice_start_date; //changed from invoice_end_date
+
+        //*********probably get rid of seven days? Just set to invoice_end_date off oldestPendingNote ***************//
+
 
                         // Invoice Status fields 'status' and 'billing_group_number'
                             // treat invoice->status as boolean even though originally set up as string:
                             $update_or_create_invoice->status = $invoice_period_status; // 0 active or 1 inactive (outside current date EST)
-                        // Probably change name of 'billing_group_number' like notes->billing_status_string
-                            $update_or_create_invoice->billing_group_number = 'billed';
+
+                        if($invoice_period_status == 0){
+                            // Probably change name of 'billing_group_number' like notes->billing_status_string
+                            $update_or_create_invoice->billing_group_number = 'billing_pending';
+                        }else{
+                            $update_or_create_invoice->billing_group_number = 'billing_complete';
+                        }
 
                         //might change to calling outside private function: 
                             $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time); //get billing code
@@ -136,27 +166,32 @@ class UserController extends Controller
                             // Add period_complete or period_ending to Note and Invoice
                                 // $updateNote->billing_status_string = $invoice_period_status;
                                 $updateNote->billing_status = $invoice_period_status; //Note billing_stauts either 'active/open' 0 or 'inactive/closed' 1
-                                $updateNote->billing_status_string = 'billed';
+                                
+                                if($invoice_period_status == 0){
+                                    $updateNote->billing_status_string = 'billing_pending';
+                                }
+                                    $updateNote->billing_status_string = 'billing_complete';
 
                                 $updateNote->save();
          
                             }
                         
 
-                        }else{
-                            // if($invoice_period_status == 'complete'){
+                        }else{ //LESS THAN 4 MINS
+
+    // **** LESS THAN 4 MINS -> NOT ENOUGHT TIME: 
                             if($invoice_period_status == 1 ){
 
     // LESS than 5 mins - PERIOD CLOSED - INVOICE UPDATE
                                 // less than 4 minutes and 7 day window is closed, so mark as not billable: 
                                 $update_or_create_invoice->status = $invoice_period_status; // 1 - closed/inactive
-                                $update_or_create_invoice->billing_group_number = 'invoice_failed'; //CHECK INVOICE FIELD NAME
-                                $update_or_create_invoice->patient_id = $note->patient_id;
+                                $update_or_create_invoice->billing_group_number = 'billing_failed'; //CHECK INVOICE FIELD NAME
+                                $update_or_create_invoice->patient_id = $patient->id;
                                 $update_or_create_invoice->cumulative_clinic_time = $check_clinic_time;
 
                             
-                                $update_or_create_invoice->seven_days_from_date_only = $invoice_end_date; //remove from final DB migration:
-                                $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time);
+                                $update_or_create_invoice->seven_days_from_date_only = $invoice_start_date; //changed from invoice_end_date
+                                $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time); //returns 'N/A'
                                 $update_or_create_invoice->save();
 
 
@@ -167,8 +202,8 @@ class UserController extends Controller
                                     // Add billing_number to note
                                     $updateNote->billing_number = $invoice_billing_number;
                                 // Add period_complete or period_ending to Note and Invoice
-                                    $updateNote->billing_status = $invoice_period_status; //Note billing_stauts either 'active/open' 0 or 'inactive/closed' 1
-                                    $updateNote->billing_status_string = 'failed';
+                                    $updateNote->billing_status = $invoice_period_status; //Note billing_stauts is 'inactive/closed' 1
+                                    $updateNote->billing_status_string = 'billing_failed';
                                     $updateNote->save();
             
                                 }
@@ -181,12 +216,13 @@ class UserController extends Controller
                                 // Less than 4 minutes but 7 day window is still open: 
 
                                 $update_or_create_invoice->status = $invoice_period_status; // 0 - open/active
-                                $update_or_create_invoice->billing_group_number = 'invoice_pending'; //CHECK INVOICE FIELD NAME
-                                $update_or_create_invoice->patient_id = $note->patient_id;
+                                $update_or_create_invoice->billing_group_number = 'billing_pending'; //CHECK INVOICE FIELD NAME
+                                $update_or_create_invoice->patient_id = $patient->id;
                                 $update_or_create_invoice->cumulative_clinic_time = $check_clinic_time;
                           
-                                $update_or_create_invoice->seven_days_from_date_only = $invoice_end_date; //remove from final DB migration:
-                                    // skip calling the billing_number function... (??)
+                                $update_or_create_invoice->seven_days_from_date_only = $invoice_start_date; //changed from invoice_end_date
+                                    // Don't skip calling the billing_code function... (??)
+                                $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time); //returns 'N/A'
                                 $update_or_create_invoice->save();
 
     // LESS than 5 mins - PERIOD STILL OPEN - NOTE(s) UPDATE
@@ -196,11 +232,10 @@ class UserController extends Controller
                                     // Add billing_number to note
                                     $updateNote->billing_number = $invoice_billing_number;
                                 // Add period_complete or period_ending to Note and Invoice
-                                    $updateNote->billing_status = $invoice_period_status; //Note billing_stauts either 'active/open' 0 or 'inactive/closed' 1
-                                    $updateNote->billing_status_string = 'pending'; //check if this will conflict with note creation status string??
+                                    $updateNote->billing_status = $invoice_period_status; //Note billing_stauts is 'active/open' 0
+                                    $updateNote->billing_status_string = 'billing_pending'; //check if this will conflict with note creation status string??
                                     $updateNote->save();
                                 }
-
 
                             }
                         }
@@ -217,8 +252,99 @@ class UserController extends Controller
             } //end of pt foreach loop
 
 
+// Separate function: ****************************************************************************
+        $pendingInvoices = Invoice::where('billing_status', 'billing_pending')->get();
 
-            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients]);
+        //Inside foreqach loop
+        foreach($pendingInvoices as $pending_invoice_check){
+
+                            $pending_invoice_start_date = $pending_invoice_check->seven_days_from_date_only;
+
+                            // Calculate end date (7 days in the future)
+                            $pending_invoice_end_date = Carbon::parse($pending_invoice_start_date)->addDays(7)->toDateString();
+
+                            // Check if invoice_end_date is less than the current date in EST.
+                            $currentDateEST = Carbon::now('America/New_York')->toDateString();
+
+        //*** IF PENDING INVOICE IS NOW CLOSED *************************************************************************/
+                            if ($pending_invoice_end_date < $currentDateEST) {
+
+                                // $close_out_billing = Invoice::find($pending_invoice_check->id);
+
+                                    $pending_invoice_check->status = 0; //inactive/closed
+                                    $pending_invoice_check->billing_group_number = 'billing_pending';
+
+                                        $get_pending_invoice_notes = Note::where('billing_number', $pending_invoice_check->id)
+                                        ->get();
+                                        $past_invoice_clinic_time = $get_pending_invoice_notes->sum('clinic_time');
+
+                                            $get_last_invoice_note_date = Note::where('billing_number', $pending_invoice_check->id)->get()->last();
+                        //GET NEW NOTES:
+                                        $get_new_invoice_notes = Note::where('patient_id', $patient->id)
+                                        ->whereBetween('date_only', [$get_last_invoice_note_date->date_only, $pending_invoice_end_date]) //change to dateTime
+                                        ->get();
+
+                        // Foreach loop to update each note in $get_new_invoice_notes
+                                    $new_invoice_clinic_time = $get_new_invoice_notes->sum('clinic_time');
+
+                        // Add up old time + new time:
+                                    $updated_invoice_clinic_time = $past_invoice_clinic_time + $new_invoice_clinic_time;
+
+                                    $pending_invoice_check->cumulative_clinic_time = $updated_invoice_clinic_time;
+                                    $pending_invoice_check->billing_code = calculateBillingCode($updated_invoice_clinic_time);
+
+                                $pending_invoice_check->save();
+
+        //*** IF PENDING INVOICE IS STILL OPEN *************************************************************************/
+                            } else {
+
+                                                    // $pending_invoice_check->
+                                                            // $patient = $note->patient;  // We already have $findPatient object available to us:
+                                                            // $clinicTime instead of $note->clinic_time
+
+                                                    // $sevenDaysAgo = now()->subDays(7)->startOfDay();
+
+                                        //Get last note with pending invoice id
+                                        $get_pending_invoice_notes = Note::where('billing_number', $pending_invoice_check->id)
+                                        ->get();
+
+
+                                        //Pass Array to where clause: https://stackoverflow.com/questions/19325312/how-to-create-multiple-where-clause-query-using-laravel-eloquent
+                                        $matchThese = ['patient_id' => $pending_invoice_check->patient_id, 'billing_numebr' => $sevenDaysAgo];
+
+                                        $checkOtherInvoices = Invoice::where($matchThese)->get();
+                                                // get first then sum?? see: https://laracasts.com/discuss/channels/eloquent/laravel-how-to-calculate-sum-of-column-values-using-eloquent
+                                                // $checkOtherInvoices = Invoice::where($matchThese)->sum('clinic_time');
+                                        $checkExistingTotal = $checkOtherInvoices->sum('clinic_time');
+                                        $cumulativeClinicTime = $clinicTime + $checkExistingTotal;
+
+                                        $invoices = Invoice::updateOrCreate(
+                                            [
+                                                'patient_id' => $findPatient->id,
+                                                'seven_days_from_date_only' => $sevenDaysAgo,
+                                            ],
+                                            [
+                                                'cumulative_clinic_time' => Invoice::where('patient_id', $findPatient->id)
+                                                    ->where('created_at', '>=', $sevenDaysAgo)
+                                                    ->sum('clinic_time') + $clinicTime,
+                                                'billing_code' => calculateBillingCode($cumulativeClinicTime), // Implement this function
+                                            ]
+                                        );
+
+                            }
+
+ 
+            }
+
+
+
+
+
+// UPDATE PENDING INVOICES END******************************************************************
+
+            $invoices = Invoice::all();
+
+            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients, 'invoices' => $invoices]);
             // return 'you are logged in'; 
         } else {
             // return view('homepage');

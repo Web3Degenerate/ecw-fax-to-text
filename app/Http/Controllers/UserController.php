@@ -88,7 +88,7 @@ class UserController extends Controller
 
     //UPDATE the Pending Invoice before closing it out:                        
                     $pending_invoice->cumulative_clinic_time = $updated_invoice_clinic_time;
-                    $pending_invoice->billing_code = calculateBillingCode($updated_invoice_clinic_time);
+                    $pending_invoice->billing_code = $this->calculateBillingCode($updated_invoice_clinic_time);
 
                     $pending_invoice->status = 1; //inactive since end_date_TIME is less than currentDate_TIME
                     if($updated_invoice_clinic_time > 4){
@@ -177,7 +177,7 @@ class UserController extends Controller
 
     //UPDATE the Pending Invoice THAT IS STILL OPEN:                         
                     $pending_invoice->cumulative_clinic_time = $updated_invoice_clinic_time;
-                    $pending_invoice->billing_code = calculateBillingCode($updated_invoice_clinic_time);
+                    $pending_invoice->billing_code = $this->calculateBillingCode($updated_invoice_clinic_time);
 
                     $pending_invoice->status = 0; //inactive since end_date_TIME is less than currentDate_TIME
 
@@ -227,14 +227,14 @@ class UserController extends Controller
 
                 
                 // Set start date:
-                $invoice_start_date = $oldestPendingNote->date_only;
+                $note_start_date = $oldestPendingNote->date_only;
             
                 // Calculate end date (7 days in the future)
-                $invoice_end_date = Carbon::parse($invoice_start_date)->addDays(7)->toDateString();
+                $note_end_date = Carbon::parse($note_start_date)->addDays(7)->toDateString();
 
-            // Check if invoice_end_date is less than the current date in EST.
+            // Check if note_end_date is less than the current date in EST.
                 $currentDateEST = Carbon::now('America/New_York')->toDateString();
-                if ($invoice_end_date < $currentDateEST) {
+                if ($note_end_date < $currentDateEST) {
                     // The invoice group is in the past and both the Note and Invoice may be marked as completed. 
                     // $invoice_period_status = 'complete';
                     // $invoice_period_status = 'inactive';
@@ -248,7 +248,7 @@ class UserController extends Controller
 
             //Get all notes in the invoice period:
                 $notes_in_billing_period = Note::where('patient_id', $patient->id)
-                    ->whereBetween('date_only', [$invoice_start_date, $invoice_end_date])
+                    ->whereBetween('date_only', [$note_start_date, $note_end_date])
                     ->get();
 
                 $check_clinic_time = $notes_in_billing_period->sum('clinic_time');
@@ -278,10 +278,10 @@ class UserController extends Controller
                     $update_or_create_invoice->patient_id = $patient->id;
                     $update_or_create_invoice->cumulative_clinic_time = $check_clinic_time;
 
-        //*********probably get rid of seven days? Just set to invoice_end_date off oldestPendingNote ***************//
-                    $update_or_create_invoice->seven_days_from_date_only = $invoice_start_date; //changed from invoice_end_date
+        //*********probably get rid of seven days? Just set to note_end_date off oldestPendingNote ***************//
+                    $update_or_create_invoice->seven_days_from_date_only = $note_start_date; //changed from note_end_date
 
-        //*********probably get rid of seven days? Just set to invoice_end_date off oldestPendingNote ***************//
+        //*********probably get rid of seven days? Just set to note_end_date off oldestPendingNote ***************//
 
 
                 // Invoice Status fields 'status' and 'billing_group_number'
@@ -296,7 +296,7 @@ class UserController extends Controller
                 }
 
                 //might change to calling outside private function: 
-                    $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time); //get billing code
+                    $update_or_create_invoice->billing_code = $this->calculateBillingCode($check_clinic_time); //get billing code
 
                     $update_or_create_invoice->save();
         // Update or Create Invoice ************************************************//
@@ -337,8 +337,8 @@ class UserController extends Controller
                         $update_or_create_invoice->cumulative_clinic_time = $check_clinic_time;
 
                     
-                        $update_or_create_invoice->seven_days_from_date_only = $invoice_start_date; //changed from invoice_end_date
-                        $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time); //returns 'N/A'
+                        $update_or_create_invoice->seven_days_from_date_only = $note_start_date; //changed from note_end_date
+                        $update_or_create_invoice->billing_code = $this->calculateBillingCode($check_clinic_time); //returns 'N/A'
                         $update_or_create_invoice->save();
 
 
@@ -347,14 +347,14 @@ class UserController extends Controller
                             //Already have found note in initial query:
                             // $updateNote = Note::find($note->id);
                             // Add billing_number to note
-                            $updateFailedNote->billing_number = $invoice_billing_number;
+                            // $updateFailedNote->billing_number = $invoice_billing_number;
+                            $updateFailedNote->billing_number = $update_or_create_invoice->id;
+
                         // Add period_complete or period_ending to Note and Invoice
                             $updateFailedNote->billing_status = $invoice_period_status; //Note billing_stauts is 'inactive/closed' 1
                             $updateFailedNote->billing_status_string = 'billing_failed';
                             $updateFailedNote->save();
                         }
-
-
                     }else{
         // LESS than 5 mins - PERIOD STILL OPEN - INVOICE UPDATE
 
@@ -365,9 +365,9 @@ class UserController extends Controller
                         $update_or_create_invoice->patient_id = $patient->id;
                         $update_or_create_invoice->cumulative_clinic_time = $check_clinic_time;
                 
-                        $update_or_create_invoice->seven_days_from_date_only = $invoice_start_date; //changed from invoice_end_date
+                        $update_or_create_invoice->seven_days_from_date_only = $note_start_date; //changed from note_end_date
                             // Don't skip calling the billing_code function... (??)
-                        $update_or_create_invoice->billing_code = calculateBillingCode($check_clinic_time); //returns 'N/A'
+                        $update_or_create_invoice->billing_code = $this->calculateBillingCode($check_clinic_time); //returns 'N/A'
                         $update_or_create_invoice->save();
 
         // LESS than 5 mins - PERIOD STILL OPEN - NOTE(s) UPDATE
@@ -375,7 +375,8 @@ class UserController extends Controller
                             // Already found note in initial query
                             // $incompleteNote = Note::find($note->id);
                             // Add billing_number to note
-                            $incompleteNote->billing_number = $invoice_billing_number;
+                            // $incompleteNote->billing_number = $invoice_billing_number;
+                            $incompleteNote->billing_number = $update_or_create_invoice->id;
                         // Add period_complete or period_ending to Note and Invoice
                             $incompleteNote->billing_status = $invoice_period_status; //Note billing_stauts is 'active/open' 0
                             $incompleteNote->billing_status_string = 'billing_pending'; //check if this will conflict with note creation status string??
@@ -389,8 +390,8 @@ class UserController extends Controller
         //Do I need the else clause? 
             // else {
             //     // Handle the case where no note is found
-            //     $invoice_start_date = null;
-            //     $invoice_end_date = null;
+            //     $note_start_date = null;
+            //     $note_end_date = null;
             // }
     }
 

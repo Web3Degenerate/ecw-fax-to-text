@@ -253,7 +253,7 @@ class UserController extends Controller
 
                 $check_clinic_time = $notes_in_billing_period->sum('clinic_time');
             
-
+// UPDATE 2/21/2024 - $oldestPendingNote will always be without a billing_number value in function checkForInvoice()
                 // Get the invoice_billing_number for this group by checking if oldest pending note has an billing_number, else create new #
                 // if(!$oldestPendingNote->billing_number){
                 if ($oldestPendingNote->billing_number !== null) {

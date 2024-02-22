@@ -236,8 +236,7 @@ class UserController extends Controller
             ->orderBy('date_only', 'asc')
             ->first();
 
-            if ($oldestPendingNote) {
-               
+            if ($oldestPendingNote) {          
                 // Set start date:
                 $note_start_date = $oldestPendingNote->date_only;
             
@@ -251,12 +250,13 @@ class UserController extends Controller
                     // $invoice_period_status = 'complete';
                     // $invoice_period_status = 'inactive';
                     $invoice_period_status = 1; //change billing_status from default 0 to 1
-                } else {
-                    // The invoice group is current, and at least the Invoice should be marked as pending? 
-                    // $invoice_period_status = 'pending';
-                    // $invoice_period_status = 'active';
-                    $invoice_period_status = 0; //keep open/active and keep billing_status as default 0
-                }
+                } 
+                    else {
+                        // The invoice group is current, and at least the Invoice should be marked as pending? 
+                        // $invoice_period_status = 'pending';
+                        // $invoice_period_status = 'active';
+                        $invoice_period_status = 0; //keep open/active and keep billing_status as default 0
+                    }
 
             //Get all notes in the invoice period:
                 $notes_in_billing_period = Note::where('patient_id', $patient->id)

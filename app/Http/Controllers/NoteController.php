@@ -316,13 +316,13 @@ class NoteController extends Controller
             $get_pt_dob = $request->input('dob');
             $get_pt_referring_provider = $request->input('referring_provider');
 
-            $patient_em_date_input = $request->input('em_date_iso');
+            
 
-            if($patient_em_date_input != '0911-09-11' && $patient_em_date_input != null){
-                $get_pt_em_date = $patient_em_date_input;
-            }else{
-                $get_pt_em_date = null;
-            }
+            // if($patient_em_date_input != '0911-09-11' && $patient_em_date_input != null){
+            //     $get_pt_em_date = $patient_em_date_input;
+            // }else{
+            //     $get_pt_em_date = null;
+            // }
 
 
          //firstOrCreate vs (v10.20) new createOrfirst: https://laravel-news.com/firstorcreate-vs-createorfirst
@@ -332,10 +332,22 @@ class NoteController extends Controller
         ], [
             'name' => $get_pt_name,
             'dob' => $get_pt_dob,
-            'referring_provider' => $get_pt_referring_provider,
-            'em_date' => $get_pt_em_date
+            'referring_provider' => $get_pt_referring_provider
+            // ,
+            // 'em_date' => $get_pt_em_date
         ]);
 // Get dateTime stamp: 
+
+        
+
+        // $patient_em_date_input = $request->input('em_date_iso');
+
+        // if($patient_em_date_input != '0911-09-11' && $patient_em_date_input != null){
+        //     $findPatient->em_date = $patient_em_date_input;
+        // }
+        // // else{
+        // //     $get_pt_em_date = null;
+        // // }
 
         $get_standardized_date_time_string = $request->input('note_date_time_string_standardized');
 //Instead of using firstOrFail(), which will throw an exception if no note is found, you should use first() and then check if the result is not null. This way, you can handle the case where no note is found more gracefully.
@@ -471,6 +483,17 @@ class NoteController extends Controller
     //     $note->billing_status_string = 'check';
     // }
 
+    $patient_em_date_input = $request->input('em_date_iso');
+
+    // Quickly update patient em_date if valid one provided
+    if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
+        // $patient_em_date = $patient_em_date_input;
+
+        //I guess we'll just go ahead and update the newly provided pt em_date on the Patient DB. 
+        $update_patient_em_date = Patient::find($findPatient->id);
+        $update_patient_em_date->em_date = $patient_em_date_input;
+        $update_patient_em_date->save();
+    }
 
     // $patient_em_date_input = $request->input('em_date_iso');  //moved 'em_date_iso' to create user check above
     if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
@@ -521,15 +544,7 @@ class NoteController extends Controller
         $note->save();   
         //******************* END OF CREATE NOTE  *************************** */           
 
-// Quickly update patient em_date if valid one provided
-    if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
-        // $patient_em_date = $patient_em_date_input;
 
-        //I guess we'll just go ahead and update the newly provided pt em_date on the Patient DB. 
-        $update_patient_em_date = Patient::find($findPatient->id);
-        $update_patient_em_date->em_date = $patient_em_date_input;
-        $update_patient_em_date->save();
-    }
 
         //****************** START OF UpdateOrCreate an Invoice object ********* */
 

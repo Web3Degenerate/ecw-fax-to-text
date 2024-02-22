@@ -48,6 +48,7 @@
           </div>
 
 
+          <h5>Invoice Section</h5>
 
       <ul>
         @foreach($invoices as $invoice)

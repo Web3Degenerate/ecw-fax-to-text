@@ -45,11 +45,10 @@ class UserController extends Controller
             // ->whereBetween('date_time_as_string', [$get_last_invoice_note_date->date_time_as_string, $pending_invoice_end_date_TIME]) 
             ->get();
 
-
+                if($pendingInvoices !== null){
                         //Inside for each loop
                         foreach($pendingInvoices as $pending_invoice){
-                                            
-                                    
+                                                                             
                             // Get start date from the Invoice DB:
                             $pending_invoice_start_date = $pending_invoice->seven_days_from_date_only;
 
@@ -222,6 +221,7 @@ class UserController extends Controller
 
 
                     } //end of for each pending note
+            } //end of if check that pending invoice exists for a given patient
         } //end of for each patients
     }
 
@@ -231,7 +231,8 @@ class UserController extends Controller
     private function checkForInvoices($patient){
 
             $oldestPendingNote = Note::where('patient_id', $patient->id)
-            ->whereIn('billing_status_string', ['pending', 'check', 'billing_pending', 'billing_completed']) // 'in-billing'
+            // ->whereIn('billing_status_string', ['pending', 'check', 'billing_pending', 'billing_completed']) // 'in-billing'
+            ->whereIn('billing_status_string', ['pending', 'check']) // 'in-billing'
             ->where('billing_status', 0) // Check that billing_status is equal to 0
             ->orderBy('date_only', 'asc')
             ->first();

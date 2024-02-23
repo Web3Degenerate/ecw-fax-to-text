@@ -10,6 +10,7 @@ use App\Http\Controllers\FollowController;
 //&&& #DCT &&& - Added Note and Patient Controllers
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\InvoiceController;
 
 
 
@@ -168,3 +169,9 @@ Route::get('/view-single-fax/{faxid}', [NoteController::class, 'retrieveSingleFa
 Route::get('/manually-enter-single-fax-form/{faxid}', [NoteController::class, 'retrieveFaxFormForManualEntry']);
 
 Route::post('/create-note-from-single-fax-form', [NoteController::class, 'createNoteFromManualFaxForm']);
+
+
+//********************** INVOICES ROUTES ***************************************** */
+
+
+Route::get('/invoice/{id}', [InvoiceController::class, 'showSingleInvoice']);

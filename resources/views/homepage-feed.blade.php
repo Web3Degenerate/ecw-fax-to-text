@@ -66,7 +66,7 @@
                     @foreach($invoices as $invoice)
                         <!-- @if($invoice->status == 0) -->
                           <!-- @if($invoice->id != 1) -->
-                              <a href="/hub/{{ $invoice->id }}" class="list-group-item list-group-item-action">
+                              <a href="/invoice/{{ $invoice->id }}" class="list-group-item list-group-item-action">
                                   <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" />
                                   {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
                                   <strong>Invoice for Patient {{ $invoice->patient_id }} which began on ({{ $invoice->seven_days_from_date_only }})</strong> had billing code:  {{ $invoice->billing_code ?? 'Missed' }} for a total 

@@ -489,10 +489,28 @@ class NoteController extends Controller
     if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
         // $patient_em_date = $patient_em_date_input;
 
-        //I guess we'll just go ahead and update the newly provided pt em_date on the Patient DB. 
-        $update_patient_em_date = Patient::find($findPatient->id);
-        $update_patient_em_date->em_date = $patient_em_date_input;
-        $update_patient_em_date->save();
+        // //I guess we'll just go ahead and update the newly provided pt em_date on the Patient DB. 
+        //         // $update_patient_em_date = Patient::find($findPatient->id);
+        //         // $update_patient_em_date->em_date = $patient_em_date_input;
+        //         // $update_patient_em_date->save();
+        // $findPatient->em_date = $patient_em_date_input;
+        // $findPatient->save();
+
+
+        $getLastEmVisit = Visit::where('patient_id', $findPatient->id)
+        ->orderBy('em_date', 'desc')
+        ->first();
+
+        if($getLastEmVist === null || $patient_em_date_input !== $getLastEmVisit->em_date){
+                $addNewEmVisit = Visit::new();
+                $addNewEmVisit->em_date = $patient_em_date_input;
+                $addNewEmVisit->patient_id = $findPatient->id;
+                $addNewEmVisit->save();
+        }
+        // else{
+            
+        // }
+
     }
 
     // $patient_em_date_input = $request->input('em_date_iso');  //moved 'em_date_iso' to create user check above

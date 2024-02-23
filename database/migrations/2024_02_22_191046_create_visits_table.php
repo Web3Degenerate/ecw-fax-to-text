@@ -20,6 +20,8 @@ return new class extends Migration
             // $table->foreign('clinic_id')->references('id')->on('clinics')->onDelete('cascade');
             $table->date('em_date');
             $table->integer('provider_id')->nullable();
+            $table->string('provider_name')->nullable();
+            $table->integer('clinic_id')->nullable();
             $table->timestamps();
         });
     }

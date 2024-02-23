@@ -12,6 +12,8 @@ use App\Models\Invoice;
 use DB; 
 use Carbon\Carbon; 
 
+use App\Models\Visit;
+
 class NoteController extends Controller
 {
     
@@ -500,25 +502,45 @@ class NoteController extends Controller
         $getLastEmVisit = Visit::where('patient_id', $findPatient->id)
         ->orderBy('em_date', 'desc')
         ->first();
+ 
+            if($getLastEmVist === null || $patient_em_date_input !== $getLastEmVisit->em_date){
+                    $addNewEmVisit = Visit::new();
+                    $addNewEmVisit->em_date = $patient_em_date_input;
+                    $addNewEmVisit->patient_id = $findPatient->id;
+                    $addNewEmVisit->save();
+ 
+                    $findPatient->em_date = $patient_em_date_input;
+                    $findPatient->save();
 
-        if($getLastEmVist === null || $patient_em_date_input !== $getLastEmVisit->em_date){
-                $addNewEmVisit = Visit::new();
-                $addNewEmVisit->em_date = $patient_em_date_input;
-                $addNewEmVisit->patient_id = $findPatient->id;
-                $addNewEmVisit->save();
-        }
-        // else{
+                    // $patient_em_date = $patient_em_date_input;
+            }
+
+            $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
+    
+            // Get current note date
+                $get_note_date_timerz = $request->input('note_date_time_iso');
+                $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+                $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+        
+            // Compare the Carbon instances
+            if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
+                $note->billing_status_string = 'pending';
+            } else {
+                $note->billing_status_string = 'invalid';
+            }
             
         // }
 
+    }else{
+        $note->billing_status_string = 'check';
     }
 
     // $patient_em_date_input = $request->input('em_date_iso');  //moved 'em_date_iso' to create user check above
-    if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
-        $patient_em_date = $patient_em_date_input;
-    }else{
-        $patient_em_date = $findPatient->em_date; //get last em_date on file or return null. 
-    }
+    // if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
+    //     $patient_em_date = $patient_em_date_input;
+    // }else{
+    //     $patient_em_date = $findPatient->em_date; //get last em_date on file or return null. 
+    // }
 
 
     if ($patient_em_date) {

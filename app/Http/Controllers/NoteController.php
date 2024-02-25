@@ -499,6 +499,9 @@ class NoteController extends Controller
         // $findPatient->save();
 
 
+        $getAllEmVisits = Visit::where('patient_id', $findPatient->id)->get();
+
+
         $getLastEmVisit = Visit::where('patient_id', $findPatient->id)
         ->orderBy('em_date', 'desc')
         ->first();
@@ -514,6 +517,28 @@ class NoteController extends Controller
 
                     // $patient_em_date = $patient_em_date_input;
             }
+
+
+//******************************* TEST CHAT GPT - 2/23/24 */
+
+// $patient_em_date_input = $request->input('em_date_iso');
+// $patient_id = $findPatient->id;
+
+// Check if the given date already exists for the patient in the Visits table
+            $existingVisit = Visit::where('patient_id', $findPatient->id)
+                ->where('em_date', $patient_em_date_input)
+                ->exists();
+
+            if (!$existingVisit) {
+                // If the date doesn't exist, create a new entry in the Visits table
+                $newEmVisit = new Visit();
+                $newEmVisit->em_date = $patient_em_date_input;
+                $newEmVisit->patient_id = $findPatient->id;;
+                $newEmVisit->save();
+            }
+
+
+//*************************************** END OF TEST 2/23/24 */
 
             $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
     

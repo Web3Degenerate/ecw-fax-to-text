@@ -156,6 +156,15 @@
                     @enderror
                 </div>
 
+    {{-- Date Format of New Template DOS date from template (2/25/2024) --}}
+                <div class="form-group">
+                    <label for="dos_date_from_template" class="text-muted mb-1"><small>E-M DOS Date:</small></label>
+                    <input value="{{old('dos_date_from_template')}}" name="dos_date_from_template" id="dos_date_from_template" class="form-control" type="date" autocomplete="off" />
+                    @error('dos_date_from_template')
+                    <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                    @enderror
+                </div>
+
 
                         <div class="form-group">
                             <label for="note_body" class="text-muted mb-1"><small>Note Text:</small></label>
@@ -246,6 +255,8 @@
 
                 const patientDateTimeStampIso = document.getElementById('patient-dateTime-stamp-iso');
                 const patientEmDateIso = document.getElementById('patient-em-date-iso');
+
+                const patientDosDateFromTemplate = document.getElementById('dos_date_from_template');
 
                 
                 const patientClinicTime = document.getElementById('patient-clinic-time');
@@ -516,7 +527,14 @@
 
                             // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))[^]*?(?:Date: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))/;
                         //2. Hard stop when reaches 'Date:' or 'Provider'
-                            const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))(?:(?!Date:|Provider).)*?(?:Date: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))/;
+                            // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))(?:(?!Date:|Provider).)*?(?:Date: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4}))/;
+                            // const emDatePattern = /(?:Last E-M-DOS: \(as "MVI-DD-YYYY" \) (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?end of time entry\. Please do not write after this line\. > II /;
+                            // const emDatePattern = /(?:Date Mnutes Acquired: \(as "MVVDD\/YYYY" \) (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                            // const emDatePattern = /(?:Last E-M-DOS: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+
+                            const emDatePattern = /(?:Last E-M-DOS: \(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+
+                            console.log('#emDatePattern Raw: ',emDatePattern)
 
                             //2. Hard stop "specifically" to Date:
                             // const emDatePattern = /(?:AM|am|PM|pm)>[^]*?(?:(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})|(?:\(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})))\s*[^]*?(?:Date:)/;
@@ -572,6 +590,28 @@
                     } else {
                         console.error('Error: No #emDateMatch match found on outter if check: ', emDateMatch);
                     }
+
+// DOS Date From Template (2/25/2024) **********************************************************************
+
+                    // const emDatePattern = /(?:Last E-M-DOS: \(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                    const dosDatePattern = /(?:Date Mnutes Acquired: \(as "MVVDD\/YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                    // const dosDatePattern = /(?:Date Mnutes Acquired: \(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+
+                    console.log('#dosDatePattern is', dosDatePattern);
+
+                    const dosDateMatch = text.match(dosDatePattern);
+                    console.log("dosDateMatch #match returned: ", dosDateMatch);
+
+                    // patientDosDateFromTemplate
+
+
+
+
+
+
+
+// END OF DOS Date From Template (2/25/2024) **********************************************************************
+
 
 // version 2 **********************************************************************
                             //         const displayEmDate = emDateMatch[1] || emDateMatch[2] || emDateMatch[3];

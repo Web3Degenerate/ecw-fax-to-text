@@ -86,7 +86,7 @@
 
     {{-- Provider --}}
                         <div class="form-group">
-                            <label for="referring_provider" class="text-muted mb-1"><small>Patient Provider:</small></label>
+                            <label for="referring_provider" class="text-muted mb-1"><small>Patient Provider From Time Stamp:</small></label>
                             <input value="{{old('referring_provider')}}" name="referring_provider" id="patient-provider" class="form-control" type="text" autocomplete="off" />
                             @error('referring_provider')
                             <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
@@ -94,6 +94,16 @@
                         </div>
 
                         
+    {{-- Provider From Template --}}
+                        <div class="form-group">
+                            <label for="referring_provider_from_template" class="text-muted mb-1"><small>Patient Provider From Template:</small></label>
+                            <input value="{{old('referring_provider_from_template')}}" name="referring_provider_from_template" id="patient-provider-from-template" class="form-control" type="text" autocomplete="off" />
+                            @error('referring_provider_from_template')
+                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
+                            @enderror
+                        </div>
+
+
 
     {{-- Clinic Time --}}
                         <div class="form-group">
@@ -243,6 +253,7 @@
                 // patientMrn.innerHTML = `MRN Number: ${accountNumber}`;
                 
                 const patientProvider = document.getElementById('patient-provider');
+                const patientProviderFromTemplate = document.getElementById('patient-provider-from-template');
                 // const phpPatientProvider = <?php //echo strval($get_date_time_string); ?>;
                 // const phpPatientProvider = "Bates, Vernice";
                 // patientProvider.innerHTML = `Provider: ${phpPatientProvider}`;
@@ -331,7 +342,9 @@
                                     }else{
                                         patientDobFormatted.value = '0911-09-11';
                                     }
-                        // Referring Provider: 
+
+
+// ********** Referring Provider From Time Stamp: ********************************************************************************************************************** //
                                     const patientProviderPattern = /Action Taken[^]*?(\b[A-Z][a-z]+,\s[A-Z][a-z]+\b)[^]*?\d{2}\/\d{2}\/\d{4}\s?\d{2}:\d{2}:\d{2}\s[APMapm]{2}>/;
         
                                     const patientProviderMatch = text.match(patientProviderPattern);
@@ -340,6 +353,54 @@
                                     patientProvider.value = `${displayPatientProvider}`;
 
                                     console.log("Patient Provider: ", displayPatientProvider);
+
+
+// ********** Referring Provider From TEMPLATE: ********************************************************************************************************************** //
+// patientProviderFromTemplate
+                                    const patientProviderFromTemplatePattern = /Provider:\s*([^>]*?)\s*\d{1,2}\/\d{1,2}\/\d{2,4}/g;
+                                                                            //   /Provider:\s*([^>]*?)\s*\d{1,2}\/\d{1,2}\/\d{2,4}/g;
+                                    // const patientProviderFromTemplateMatch = text.match(patientProviderFromTemplatePattern);
+                                    // const patientProviderFromTemplateMatch = [...text.match(patientProviderFromTemplatePattern)];
+
+                                        let matchFromTemplate;
+                                        let lastMatchFromTemplate;
+
+                                        while ((matchFromTemplate = patientProviderFromTemplatePattern.exec(text)) !== null) {
+                                            lastMatchFromTemplate = matchFromTemplate;
+                                        }
+
+                                        if (lastMatchFromTemplate) {
+                                            const providerNameFromTemplate = lastMatchFromTemplate[1].trim();
+                                            patientProviderFromTemplate.value = `${providerNameFromTemplate}`;
+                                            console.log("Provider Name From Template: ", providerNameFromTemplate);
+                                        } else {
+                                            patientProviderFromTemplate.value = "Provider Name Not Found In Template";
+                                            console.log("Provider Name From Template Not Found.");
+                                        }
+
+
+
+
+
+
+                                        // if (patientProviderFromTemplateMatch.length > 0) {
+                                        //     const lastMatch = patientProviderFromTemplateMatch[patientProviderFromTemplateMatch.length - 1];
+                                        //     const providerNameFromTemplate = lastMatch[1].trim();
+                                        //     patientProviderFromTemplate.value = `${providerNameFromTemplate}`;
+                                        //     console.log("Provider Name From Template: ", providerNameFromTemplate);
+                                        // } else {
+                                        //     patientProviderFromTemplate.value = "Provider Name Not Found In Template";
+                                        //     console.log("Provider Name From Template Not Found.");
+                                        // }
+
+
+                                    // const displayProviderFromTemplate = patientProviderFromTemplateMatch ? patientProviderFromTemplateMatch[1].trim() : 'Error: Provider From Template Not Found!';
+                                    // // patientProvider.innerHTML = `Provider: ${displayProviderFromTemplate}`;
+                                    // patientProviderFromTemplate.value = `${displayProviderFromTemplate}`;
+
+                                    // console.log("Patient Provider FROM TEMPLATE: ", displayProviderFromTemplate);
+
+
                                 
  // ********* DATE TIME STAMP AS STRING ************************************************************************************************************* //
  
@@ -532,7 +593,15 @@
                             // const emDatePattern = /(?:Date Mnutes Acquired: \(as "MVVDD\/YYYY" \) (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
                             // const emDatePattern = /(?:Last E-M-DOS: (\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
 
-                            const emDatePattern = /(?:Last E-M-DOS: \(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                            // const emDatePattern = /(?:Last E-M-DOS: \(as "?MVI-DD-YYYY"?\s*\)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                            
+                        //Last working version 2/25/24 - 9:50pm
+                            // const emDatePattern = /(?:Last E-M-DOS: \(as "?MVI-DD-YYYY"?\s*\)=?>?\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+
+                            // const emDatePattern = /(?:Date of Last Pati?ent E-M\s* :? \(as "?MVI-DD-YYYY"?\s*\)=?>?\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                            // const emDatePattern = /(?:Last E-M-Visit:? \(as "?MVI-DD-YYYY"?\s*\)=?>?\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                            const emDatePattern = /(?:Last E-M-Visit:? \(as "?MVI-DD-YYYY"?\s*\)=?>?\s*(\d{1,2}[-\/\\\.i]\d{1,2}[-\/\\\.i]\d{2,4})).*?>/;
+
 
                             console.log('#emDatePattern Raw: ',emDatePattern)
 
@@ -565,13 +634,21 @@
                             console.log("Trimmed match: ", trimmedMatchEm);
 
                             // Regular expression to match 'MM/DD/YYYY' or 'MM-DD-YYYY'
-                            const datePatternEm = /(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/;
+                            // Adds in backslash and dot:
+                            // const datePatternEm = /(\d{1,2}[-\/\\\.]\d{1,2}[-\/\\\.]\d{2,4})/;
+
+                            // const datePatternEm = /(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/;
+                            const datePatternEm = /(\d{1,2}[-\/\\\.i]\d{1,2}[-\/\\\.i]\d{2,4})/;
+                            
 
                             const matchDateEm = trimmedMatchEm.match(datePatternEm);
 
                                 if (matchDateEm) {
-                                    const displayEmDate = matchDateEm[1];
+                                    // const displayEmDate = matchDateEm[1];
+                                    let displayEmDate = matchDateEm[1];
                                     console.log("displayEmDate searching #trimmedMatchEm returned: ", displayEmDate);
+
+                                    displayEmDate = displayEmDate.replace(/[i.\\]/g, '/');
 
                                     const dateObjectEm = new Date(displayEmDate); // Parse the date string
                                     const formattedDateEm = dateObjectEm.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
@@ -594,16 +671,75 @@
 // DOS Date From Template (2/25/2024) **********************************************************************
 
                     // const emDatePattern = /(?:Last E-M-DOS: \(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
-                    const dosDatePattern = /(?:Date Mnutes Acquired: \(as "MVVDD\/YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                    // const dosDatePattern = /(?:Date Mnutes Completed: \(as "MVVDD\/YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                    // const dosDatePattern = /(?:Date Mnutes Completed: \(as "MVVDD\/YYYY" \)=>\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                    // const dosDatePattern = /(?:Date Mnutes Completed: \(as "MVI-DD-YYYY"\s*\)=>\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+
+                //last working version 2/25/24 - 9:50pm
+                    // const dosDatePattern = /(?:Date Mnutes Completed: \(as "?MVI-DD-YYYY"?\s*\)=?>?\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+                    // Date Mnutes Completed:
+                    const dosDatePattern = /(?:Date Mnutes Completed: \(as "?MVI-DD-YYYY"?\s*\)=?>?\s*(\d{1,2}[-\/\\\.i]\d{1,2}[-\/\\\.i]\d{2,4})).*?>/;
+
+
+                    // const dosDatePattern = /(?:Date Mnutes Completed: \(as "MVVDDNYYr \)=>\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
+
                     // const dosDatePattern = /(?:Date Mnutes Acquired: \(as "MVI-DD-YYYY" \)\s*(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})).*?>/;
 
                     console.log('#dosDatePattern is', dosDatePattern);
 
                     const dosDateMatch = text.match(dosDatePattern);
                     console.log("dosDateMatch #match returned: ", dosDateMatch);
+                    // console.log("dosDateMatch[0] returns, ",dosDateMatch[0]);
+
+                    
 
                     // patientDosDateFromTemplate
+                    if (dosDateMatch) {
+                            // Trim at 'Date:' or 'Provider'
+                            // const trimmedMatchEm = emDateMatch[0].split(/Date:|Provider/)[0].trim();
+                            // const trimmedMatchDosDate = dosDateMatch[0].split(/ /)[0].trim();
+                            const trimmedMatchDosDate = dosDateMatch[0].split(/Date:|Provider/)[0].trim();
 
+                            // const trimmedMatchDosDate = dosDateMatch[1];
+
+                            console.log("Trimmed match: ", trimmedMatchDosDate);
+
+                            // Regular expression to match 'MM/DD/YYYY' or 'MM-DD-YYYY'
+                            // const datePatternEm = /(\d{1,2}[-\/]\d{1,2}[-\/]\d{2,4})/;                           
+                            // const datePatternDosDate = /(\d{1,2}[-\/i]\d{1,2}[-\/i]\d{2,4})/;
+                            const datePatternDosDate = /(\d{1,2}[-\/\\\.i]\d{1,2}[-\/\\\.i]\d{2,4})/;
+
+                            const matchDateDosDate = trimmedMatchDosDate.match(datePatternDosDate);
+
+                                if (matchDateDosDate) {
+                                    // const displayDosDate = matchDateDosDate[1];
+                                    let displayDosDate = matchDateDosDate[1];
+
+                                        // // Replace 'i' with '/'
+                                        // displayDosDate = displayDosDate.replace(/i/g, '/');
+                                        // Replace 'i', '.' or '\' with '/'
+                                        displayDosDate = displayDosDate.replace(/[i.\\]/g, '/');
+                                        
+                                    console.log("displayDosDate searching #trimmedMatchDosDate returned: ", displayDosDate);
+
+                                    const dateObjectDosDate = new Date(displayDosDate); // Parse the date string
+                                    const formattedDateDosDate = dateObjectDosDate.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+                                    console.log("formattedDateDosDate is: ", formattedDateDosDate)
+
+                                    patientDosDateFromTemplate.value = formattedDateDosDate;
+                                } else {
+                                    // console.error('Error: Date Not Found');
+                                        fakeDate = '0911-09-11';
+                                        const dateObjectEmFake = new Date(fakeDate); // Parse the date string
+                                        const formattedDateEmFake = dateObjectEmFake.toISOString().split('T')[0]; // Convert to ISO format and extract the date part
+
+                                        patientEmDapatientDosDateFromTemplateteIso.value = formattedDateEmFake;
+                                        // patientEmDateIso.vaue = '0911-09-11';
+                                        console.error('Error: Patient Last EM Visit Not Found. formattedDateEmFake used instead: ', formattedDateEmFake);
+                                } 
+                    } else {
+                        console.error('Error: No #dosDateMatch match found on outter if check: ', dosDateMatch);
+                    }
 
 
 

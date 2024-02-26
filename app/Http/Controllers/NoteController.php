@@ -27,9 +27,7 @@ class NoteController extends Controller
         $note->mrn = $request->input('user_mrn'); 
         $note->user_id = $request->input('user_id'); 
         $note->note_date = $request->input('note_date');
-        
-        
-        
+            
         //1/6/21 update - SOLUTION! $datetime_from = (new Carbon($thestime))->subMinutes(45)->format('Y-m-d H:i');
         // FROM: https://stackoverflow.com/questions/11688829/php-use-strtotime-to-subtract-minutes-from-a-date-time-variable
         // $note->time_in = $request->input('time_in');
@@ -42,9 +40,185 @@ class NoteController extends Controller
             $time_in_calc = (new Carbon($time_out_calc))->subMinutes($clinc_time_manual)->format('H:i:s');
         }
 
+// *********************************************************************************************************************************
+
+public function createNoteManually(Request $request){
+
+    // $getPatient = Patient::find($request->input('mrn'));
+    $get_pt_mrn = $request->input('mrn');
+        $get_pt_name = $request->input('patient_name');
+        $get_pt_dob = $request->input('dob');
+        $get_pt_referring_provider = $request->input('referring_provider');
+
+
+     //firstOrCreate vs (v10.20) new createOrfirst: https://laravel-news.com/firstorcreate-vs-createorfirst
+    // FROM StackOverFlow: https://stackoverflow.com/questions/25178464/first-or-create
+    $findPatient = Patient::firstOrCreate([
+        'mrn' => $get_pt_mrn
+    ], [
+        'name' => $get_pt_name,
+        'dob' => $get_pt_dob,
+        'referring_provider' => $get_pt_referring_provider
+        // ,
+        // 'em_date' => $get_pt_em_date
+    ]);
+
+
+    $get_standardized_date_time_string = $request->input('note_date_time_string_standardized');
+
+        $fax_details_id = $request->input('fax_details_id');
+
+        $note = Note::where('fax_details_id', $fax_details_id)->first();
+
+        if($note){
+            $note = $note;
+        }else{
+            $note = new Note;
+        }
+
+        $note->patient_id = $findPatient->id;
+
+        $note->patient_name = $get_pt_name; 
+        $note->pt_mrn = $get_pt_mrn; 
+
+        $note->patient_dob = $get_pt_dob; 
+
+        $note->note_provider = $request->input('referring_provider'); 
+
+        $note->date_time_as_string = $request->input('note_date_time_string_standardized');
+
+
+$dateTimeOfNote = $request->input('note_date_time_iso');
+$clinicTime = $request->input('clinic_time');
+
+    //Store the time spent in minutes: 
+    $note->clinic_time = $clinicTime;   // example 2
+
+// Modified dateTime and time fields: Example: 01/31/2024 08:19 PM
+    $carbonDateTime = Carbon::parse($dateTimeOfNote);
+
+    $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
+
+    $note->time_out = $carbonDateTime->format('H:i:s'); // stores "08:19 PM as 20:19:00"
+
+    // Format date_only
+    $current_note_date_on_timestamp = $carbonDateTime->toDateString();
+    $note->date_only = $current_note_date_on_timestamp;
+
+    // Add 7 days to the date_only field
+    $billingExpirationDate = $carbonDateTime->copy()->addDays(7)->format('Ymd');
+    $formatted_billingExpirationDate = Carbon::createFromFormat('Ymd', $billingExpirationDate);
+
+    // Save the billing_expiration_date field
+    $note->billing_expiration_date = $formatted_billingExpirationDate; // 7 days from current note_date
+
+// ************************************************************************************************************************************* //
+
+
+$patient_em_date_input = $request->input('em_date_iso');
+
+// Quickly update patient em_date if valid one provided
+if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
+    // $patient_em_date = $patient_em_date_input;
+
+
+    $getAllEmVisits = Visit::where('patient_id', $findPatient->id)->get();
+
+
+    $getLastEmVisit = Visit::where('patient_id', $findPatient->id)
+    ->orderBy('em_date', 'desc')
+    ->first();
+
+        if($getLastEmVist === null || $patient_em_date_input !== $getLastEmVisit->em_date){
+                $addNewEmVisit = Visit::new();
+                $addNewEmVisit->em_date = $patient_em_date_input;
+                $addNewEmVisit->patient_id = $findPatient->id;
+                $addNewEmVisit->save();
+
+                $findPatient->em_date = $patient_em_date_input;
+                $findPatient->save();
+        }
+
+
+//******************************* TEST CHAT GPT - 2/23/24 */
+
+// Check if the given date already exists for the patient in the Visits table
+        $existingVisit = Visit::where('patient_id', $findPatient->id)
+            ->where('em_date', $patient_em_date_input)
+            ->exists();
+
+        if (!$existingVisit) {
+            // If the date doesn't exist, create a new entry in the Visits table
+            $newEmVisit = new Visit();
+            $newEmVisit->em_date = $patient_em_date_input;
+            $newEmVisit->patient_id = $findPatient->id;;
+            $newEmVisit->save();
+        }
+
+
+//*************************************** END OF TEST 2/23/24 */
+
+        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
+
+        // Get current note date
+            $get_note_date_timerz = $request->input('note_date_time_iso');
+            $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+            $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+    
+        // Compare the Carbon instances
+        if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
+            $note->billing_status_string = 'pending';
+        } else {
+            $note->billing_status_string = 'invalid';
+        }
         
+    // }
+
+}else{
+    $note->billing_status_string = 'check';
+}
 
 
+
+if ($patient_em_date) {
+    // Convert the patient_em_date string to a Carbon instance
+    $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
+
+    // Get current note date
+        $get_note_date_timerz = $request->input('note_date_time_iso');
+        $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+        $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+
+    // Compare the Carbon instances
+    if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
+        $note->billing_status_string = 'pending';
+    } else {
+        $note->billing_status_string = 'invalid';
+    }
+} else {
+    $note->billing_status_string = 'check';
+}
+
+
+    $note->review_status = 1; //migration on 2/4/2024 as another boolean value, 0 needs review, 1 review complete.
+
+    $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('H:i:s'); // saves as "20:17:00"
+    
+    $note->save();   
+    //******************* END OF CREATE NOTE  *************************** */           
+
+
+// ******************** END of UpdateOrCreate Invoice Object => finally return back() to the view: **********//
+    // return back()->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
+    return redirect('/fax-inbox')->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
+
+// }
+
+
+} //end of manual save note entry (createNoteFromManualFaxForm)
+
+
+// *********************************************************************************************************************************
 
 // __  __                         _    ____      _ _   _____       ____  ____  _____               _    ____ ___ 
 // |  \/  | __ _ _ __  _   _  __ _| |  / ___|__ _| | | |_   _|__   / ___||  _ \|  ___|_ ___  __    / \  |  _ \_ _|
@@ -297,6 +471,25 @@ class NoteController extends Controller
         // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
 
         return view('fax-enter-single-form', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData,
+                    'faxDetailsId' => $sFaxDetailsID]);
+    }
+
+
+    public function retrieveFaxFormForManualEntryClean($faxid){
+        $sFaxDetailsID = $faxid;
+  
+        $check_retrieve_fax = $this->retrieveFax($sFaxDetailsID);
+        // return view('fax-view-single', ['pdfDataUrl' => $check_retrieve_fax]);
+                                                
+        // $retrieveFaxResponse = file_get_contents($check_retrieve_fax); // don't need file_get_contents in laravel
+        $decodedResult = json_decode($check_retrieve_fax, true);
+        $pdfData = $decodedResult['Result'];
+
+        $dataUrlPdfData = 'data:application/pdf;base64,' . $pdfData;
+
+        // $pdfDataUrl = json_encode($dataUrlPdfData); json_encode in the view's JS?? (1/29/24)
+
+        return view('fax-enter-single-form-clean', ['dataUrlPdfData' => $dataUrlPdfData, 'pdfData' => $pdfData,
                     'faxDetailsId' => $sFaxDetailsID]);
     }
 

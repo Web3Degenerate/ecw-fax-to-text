@@ -48,16 +48,21 @@
                             <ul>
                                 <li>
                             @if($note->review_status == 0)
-                                <a href="/manually-enter-single-fax-form/{{ $note->fax_details_id }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#33ff77">
-                                    {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
-                                    {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
+                                {{-- <a href="/manually-enter-single-fax-form/{{ $note->fax_details_id }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#33ff77"> --}}
+                                <a href="/manually-enter-clinic-time/{{ $note->fax_details_id }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#33ff77">
+
+                                    
+                                            {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
+                                            {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
                                     <strong>Manually Enter Fax Received On: {{ $note->date_time_fax_received }} </strong>
                                 </a>
                             @endif
                             @if($note->review_status == 1)
-                                <a href="/manually-enter-single-fax-form/{{ $note->fax_details_id }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#b3c6ff">
-                                    {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
-                                    {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
+                                {{-- <a href="/manually-enter-single-fax-form/{{ $note->fax_details_id }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#b3c6ff"> --}}
+                                <a href="/manually-enter-clinic-time/{{ $note->fax_details_id }}" class="list-group-item list-group-item-action btn btn-success btn-sm" style="background:#b3c6ff">
+
+                                            {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
+                                            {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
                                     <strong>Fax Received On: {{ $note->date_time_fax_received }} Entered for Patient {{ $note->patient_name }} </strong>
                                 </a>
                             @endif

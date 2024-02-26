@@ -6,10 +6,12 @@
 
         <div class="text-center">
           {{-- <h2>Hello <strong>{{ ucwords(auth()->user()->username) }}</strong>, your feed is empty.</h2> --}}
-          <h2><strong>Manually Entry Form:</strong> For Single Fax:</h2>
+          {{-- <h2><strong>Manually Enter Clinic Time:</strong> From Fax:</h2> --}}
+          <h2><strong>Manually Enter Clinic Time:</strong></h2>
+
           {{-- <p class="lead text-muted">If you don&rsquo;t have any friends to follow that&rsquo;s okay; you can use the &ldquo;Search&rdquo; feature in the top menu bar to find content written by people with similar interests and then follow them.</p> --}}
-          <p class="lead text-muted">Review and submit the note with the relevant E-M details.</p>
-        
+          <p class="lead text-muted">Review, edit and submit the information extracted from the faxed note.</p>
+       
         </div>
   
   
@@ -30,23 +32,23 @@
   
                   
             <div class="list-group-item list-group-item-action">
-                <h5>Extracted Text From Fax</h5>
+                <h5>Extracted Fields From Fax</h5>
                     {{-- <img class="avatar-tiny" src="https://0.gravatar.com/avatar/0d08988056acc135805ec1f5901f88ad19dd96c81966c088548f9335f11a56de?size=256" /> --}}
                     {{-- <strong>{{ $post->title }}</strong> on {{ $post->created_at->format('m/d/Y') }} or {{ $post->created_at->format('n/j/Y') }} --}}
                     {{-- <strong>{{ $pdfDataUrl }} </strong> --}}
 
 
-                    <form action="/create-note-from-single-fax-form" method="POST" class="mb-0 pt-2 pt-md-0" id="registration-form">
+                    <form action="/create-note-manually" method="POST" class="mb-0 pt-2 pt-md-0" id="registration-form">
                         @csrf
 
 {{-- Hidden Input Fields --}}
-
-                    <input type="text" id="fax_image_link" name="fax_image_link" value="<?php echo $fax_image_link; ?>">
-                    <input type='text' id='fax-details-id' name="fax_details_id" value="<?php echo $faxDetailsId;?>">
+{{-- Changed from text to hidden --}}
+                    <input type="hidden" id="fax_image_link" name="fax_image_link" value="<?php echo $fax_image_link; ?>">
+                    <input type='hidden' id='fax-details-id' name="fax_details_id" value="<?php echo $faxDetailsId;?>">
 
 {{-- PATIENT NAME --}}
                         <div class="form-group">
-                          <label for="patient_name" class="text-muted mb-1"><small>Patient</small></label>
+                          <label for="patient_name" class="text-muted mb-1"><small>Patient Name</small></label>
                           {{-- autocomplete="off" --}}
                           <input value="{{old('patient_name')}}" name="patient_name" id="patient-name" class="form-control" type="text"  />
                         {{-- (11:50) Added error message: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#overview --}}
@@ -73,32 +75,11 @@
                         @enderror
                     </div>
 
-{{-- DOB string --}}
-                    <div class="form-group">
-                        <label for="dob_formatted" class="text-muted mb-1"><small>DOB Formatted</small></label>
-                        <input value="{{old('dob_formatted')}}" name="dob_formatted" id="patient-dob-formatted" class="form-control" type="date" autocomplete="off" />
-                        @error('dob_formatted')
-                        <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
-                    </div>
-
-                    
-
-{{-- Provider --}}
-                    <div class="form-group">
-                        <label for="referring_provider" class="text-muted mb-1"><small>Patient Provider From Time Stamp:</small></label>
-                        <input value="{{old('referring_provider')}}" name="referring_provider" id="patient-provider" class="form-control" type="text" autocomplete="off" />
-                        @error('referring_provider')
-                        <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
-                    </div>
-
-                    
 {{-- Provider From Template --}}
                     <div class="form-group">
-                        <label for="referring_provider_from_template" class="text-muted mb-1"><small>Patient Provider From Template:</small></label>
-                        <input value="{{old('referring_provider_from_template')}}" name="referring_provider_from_template" id="patient-provider-from-template" class="form-control" type="text" autocomplete="off" />
-                        @error('referring_provider_from_template')
+                        <label for="referring_provider" class="text-muted mb-1"><small>Patient Provider:</small></label>
+                        <input value="{{old('referring_provider')}}" name="referring_provider" id="patient-provider-from-template" class="form-control" type="text" autocomplete="off" />
+                        @error('referring_provider')
                         <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
                         @enderror
                     </div>
@@ -114,49 +95,7 @@
                         @enderror
                     </div>
 
-
-{{-- Date Time String --}}
-                    <div class="form-group">
-                        <label for="note_date_time_string" class="text-muted mb-1"><small>Date Time String</small></label>
-                        <input value="{{old('note_date_time_string')}}" name="note_date_time_string" id="patient-dateTime-stamp-string" class="form-control" type="text" autocomplete="off" />
-                        @error('note_date_time_string')
-                          <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
-                    </div>
-
-{{-- Date Time String --}}
-                    <div class="form-group">
-                        <label for="note_date_time_string_standardized" class="text-muted mb-1"><small>Date Time String (Standardized)</small></label>
-                        <input value="{{old('note_date_time_string_standardized')}}" name="note_date_time_string_standardized" id="patient-dateTime-stamp-string-standardized" class="form-control" type="text" autocomplete="off" />
-                        @error('note_date_time_string_standardized')
-                        <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
-                    </div>
-
-
-
-{{-- Date Time Formatted as dateTime Object --}}
-                    <div class="form-group">
-                        <label for="note_date_time_formatted" class="text-muted mb-1"><small>Date Time Formatted</small></label>
-                        {{-- <input value="{{old('note_date_time_formatted')}}" name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="text" autocomplete="off" /> --}}
-                        <input value="{{old('note_date_time_formatted')}}" name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="text" autocomplete="off" />
-                        @error('note_date_time_formatted')
-                          <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
-                    </div>
-
-{{-- Date Time Formatted as datetime-local (iso) WITHOUT time zone --}}
-                    <div class="form-group">
-                        <label for="note_date_time_iso" class="text-muted mb-1"><small>Date Time Iso Format:</small></label>
-                        {{-- <input value="{{old('note_date_time_formatted')}}" name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="text" autocomplete="off" /> --}}
-                        <input value="{{old('note_date_time_iso')}}" name="note_date_time_iso" id="patient-dateTime-stamp-iso" class="form-control" type="datetime-local" autocomplete="off" />
-                        @error('note_date_time_iso')
-                        <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
-                    </div>
-
-
-{{-- Date Time Formatted as datetime-local (iso) WITHOUT time zone --}}
+                    {{-- Date Time Formatted as datetime-local (iso) WITHOUT time zone --}}
             <div class="form-group">
                 <label for="em_date_iso" class="text-muted mb-1"><small>Date of Last E-M Visit:</small></label>
                 {{-- <input value="{{old('note_date_time_formatted')}}" name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="text" autocomplete="off" /> --}}
@@ -175,43 +114,75 @@
                 @enderror
             </div>
 
+            <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Create Note</button>
 
-                    <div class="form-group">
-                        <label for="note_body" class="text-muted mb-1"><small>Note Text:</small></label>
-                        <textarea id="note-body" name="note_body" rows="4" class="form-control">
-                            
-                        </textarea>
-                        @error('note_body')
-                            <p class="m-0 small alert alert-danger shadow-sm">{{$message}}</p>
-                        @enderror
+
+{{-- dob_formatted => not being used. Was of type DATE --}}
+                    {{-- <div class="form-group" style="visibility: hidden"> --}}
+                        {{-- <label for="dob_formatted" class="text-muted mb-1"><small>DOB Formatted</small></label> --}}
+                        <input name="dob_formatted" id="patient-dob-formatted" class="form-control" type="hidden" autocomplete="off" />
+                    {{-- </div> --}}
+
+                    
+
+{{-- ORIGINAL 'referring_provider' pulled from timeStamp. Was of type TEXT. Input name 'referring_provider' now moved to FROM TEMPLATE below) --}}
+                    {{-- <div class="form-group"> --}}
+                        {{-- <label for="referring_provider_from_timestamp" class="text-muted mb-1"><small>Patient Provider From Time Stamp:</small></label> --}}
+                        <input name="referring_provider_from_timestamp" id="patient-provider" class="form-control" type="hidden" autocomplete="off" />
+                    {{-- </div> --}}
+
+                    
+
+
+
+{{-- note_date_time_string => NOT being used. Was of type TEXT --}}
+                    {{-- <div class="form-group"> --}}
+                        {{-- <label for="note_date_time_string" class="text-muted mb-1"><small>Date Time String</small></label> --}}
+                        <input name="note_date_time_string" id="patient-dateTime-stamp-string" class="form-control" type="hidden" autocomplete="off" />
+                    {{-- </div> --}}
+
+{{-- note_date_time_string_standardized => saved to field in note ($note->date_time_as_string) --}}
+{{-- Changed to hidden. Was of type 'text' --}}
+                    {{-- <div class="form-group"> --}}
+                        {{-- <label for="note_date_time_string_standardized" class="text-muted mb-1"><small>Date Time String (Standardized)</small></label> --}}
+                        <input name="note_date_time_string_standardized" id="patient-dateTime-stamp-string-standardized" class="form-control" type="hidden" autocomplete="off" />
+                    {{-- </div> --}}
+
+
+
+{{-- note_date_time_formatted => NOT BEING USED> (originally attempt for Date Time Formatted as dateTime Object). Was of type TEXT --}}
+                    {{-- <div class="form-group"> --}}
+                        {{-- <label for="note_date_time_formatted" class="text-muted mb-1"><small>Date Time Formatted</small></label> --}}
+                        <input name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="hidden" autocomplete="off" />
+                    {{-- </div> --}}
+
+{{-- Date Time Formatted as datetime-local (iso) WITHOUT time zone --}}
+                    <div class="form-group" style="visibility:hidden;">
+                        {{-- <label for="note_date_time_iso" class="text-muted mb-1"><small>Date Time Iso Format:</small></label> --}}
+                        {{-- <input value="{{old('note_date_time_formatted')}}" name="note_date_time_formatted" id="patient-dateTime-stamp-formatted" class="form-control" type="text" autocomplete="off" /> --}}
+                        <input name="note_date_time_iso" id="patient-dateTime-stamp-iso" class="form-control" type="datetime-local" autocomplete="off" />
                     </div>
+
+
+
+
+
+                    {{-- <div class="form-group"> --}}
+                        {{-- <label for="note_body" class="text-muted mb-1"><small>Note Text:</small></label> --}}
+                    <div style="visibility: hidden">
+                        <textarea id="note-body" name="note_body" rows="1" class="form-control">
+                        </textarea>
+                    </div>
+
+                    {{-- </div> --}}
                     
-                        <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Create Note</button>
+                        {{-- <button type="submit" class="py-3 mt-4 btn btn-lg btn-success btn-block">Create Note</button> --}}
               </form>
-
-
-
-
-
-                    {{-- <p id="patient-name">Patient: <i>Loading...</i></p> --}}
-                    {{-- <p id="patient-dob">DOB: <i>Loading...</i></p> --}}
-                    {{-- <p id="account-number">MRN Number: <i>Loading...</i></p> --}}
-                    
-                    {{-- <p id="patient-provider">Provider: <i>Loading...</i></p> --}}
-                    {{-- <p id="patient-dateTime-stamp">Note Date and Time: <i>Loading...</i></p> --}}
-                    {{-- <p id="patient-clinic-time">Clinic Time Spent: <i>Loading...</i></p> --}}
-
             </div>
         </div>
+
 {{-- START OF details.php --}}
-
-
-    <!--<div id="text-layer"></div>-->
-
-<!--<div id="notes-results"><i>Searching For Qualifying Provider Notes</i></div>-->
-
-    <div id="notes-container">
-        <!--<h5 id="notes-status"></h5>-->
+    {{-- <div id="notes-container">
         <ul id="notes-results"><i>Searching For Qualifying Provider Notes</i></ul>
     </div>
 
@@ -221,7 +192,7 @@
 <h2>All Text From the Fax:</h2>
     <div id="pdf-container" class="list-group-item list-group-item-action">
         <ul id="fax-results"></ul>
-    </div>
+    </div> --}}
 
 {{-- *********************************** START PDF.JS SCRIPT HERE ************************************  --}}
  
@@ -293,12 +264,12 @@
                                 });
                                 console.log(' Page ', + pageNumber + ': ' + text);
                                 
-                                //Display Full Text By Page: 
-                                //https://teamtreehouse.com/community/ulcreateelement-is-not-a-function-error
-                                const ul = document.getElementById('fax-results');
-                                const li = document.createElement('li');
-                                li.textContent = `Page , ${pageNumber}: ${text}`;
-                                ul.appendChild(li);//add item to the list
+//Display Full Text By Page: 
+//https://teamtreehouse.com/community/ulcreateelement-is-not-a-function-error
+    // const ul = document.getElementById('fax-results');
+    // const li = document.createElement('li');
+    // li.textContent = `Page , ${pageNumber}: ${text}`;
+    // ul.appendChild(li);//add item to the list
     
                         // Extract Account Number using JavaScript
                                 const match = text.match(/Account No:\s*(\d{5,6})/i);
@@ -833,41 +804,42 @@
                                 // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)/gs;
                 //Go back to this one above, but don't match until after first occurrence of 'Action Taken:'
                                 // const pattern = /(?:(?!Action Taken).*?\n)?(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)/gs;
-                //Remove requirement 'Action Taken:' (with colon). Also accept date-time with no space:
-                                const pattern = /(?:(?!Action Taken:).*?\n)?(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s?\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s?\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)/gs;
+    
+//Remove requirement 'Action Taken:' (with colon). Also accept date-time with no space:
+    // const pattern = /(?:(?!Action Taken:).*?\n)?(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s?\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s?\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)/gs;
                 
-                // Go back to this base but cut on 2nd double score; 
-                                // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)(?=(?:(?:(?!\s{0,3}>|$|__).)*__){2})/gs;
+                                            // Go back to this base but cut on 2nd double score; 
+                                            // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)(?=(?:(?:(?!\s{0,3}>|$|__).)*__){2})/gs;
     
                  
-                //Attempting to remove unwanted words (negative regex)
-                                //const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)(?!(Date: \d{2}\/\d{2}\/\d{4}|Time: \d{2}:\d{2} [APMapm]{2}|From: [A-Za-z\s,]+|Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Message:.*?Addressed To:|Action Taken:))/gs;
+                                            //Attempting to remove unwanted words (negative regex)
+                                                //const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)(?!(Date: \d{2}\/\d{2}\/\d{4}|Time: \d{2}:\d{2} [APMapm]{2}|From: [A-Za-z\s,]+|Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Message:.*?Addressed To:|Action Taken:))/gs;
                    
-                //3 space yolo try
-                                // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)(?!(Date: \d{2}\/\d{2}\/\d{4}|Time: \d{2}:\d{2} [APMapm]{2}|From: [A-Za-z\s,]+|Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Message:.*?Addressed To:|Action Taken:))(.*?)(?=\s{0,3}>|$)/gs;
+                                            //3 space yolo try
+                                                // const pattern = /(?:\S+,\s*[A-Za-z\s,]+)?\s?(\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>)(.*?)(?=(?:\S+,\s*[A-Za-z\s,]+)?\s?\d{2}\/\d{2}\/\d{4}\s\d{2}:\d{2}:\d{2}\s[APMapm]{2}>|$)(?!(Date: \d{2}\/\d{2}\/\d{4}|Time: \d{2}:\d{2} [APMapm]{2}|From: [A-Za-z\s,]+|Created: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Sent: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}|Message:.*?Addressed To:|Action Taken:))(.*?)(?=\s{0,3}>|$)/gs;
                                 
-                                const matches = [...text.matchAll(pattern)];
+    // const matches = [...text.matchAll(pattern)];
                                 
-                                // Display or use the extracted matches as needed
-                                console.log('Matches:', matches);
+// Display or use the extracted matches as needed
+    // console.log('Matches:', matches);
             
-                                // Display the extracted matches on the page
-                                const NotesUl = document.createElement('ul');
-                                // const NotesUl = document.getElementById('notes-results');
-                                matches.forEach(match => {
-                                    const li = document.createElement('li');
-                                    li.textContent = match[0];
-                                    NotesUl.appendChild(li);
-                                });
-                                patientMatchesDiv.appendChild(NotesUl);    
-                                notesStatusHeader.innerHTML = "<h3>Extracted Provider Note Results</h3>";
+// Display the extracted matches on the page
+    // const NotesUl = document.createElement('ul');
+// const NotesUl = document.getElementById('notes-results');
+        // matches.forEach(match => {
+        //     const li = document.createElement('li');
+        //     li.textContent = match[0];
+        //     NotesUl.appendChild(li);
+        // });
+        // patientMatchesDiv.appendChild(NotesUl);    
+        // notesStatusHeader.innerHTML = "<h3>Extracted Provider Note Results</h3>";
 
-                                // matches.forEach(match => {
-                                //     noteBodyMatchesDiv.value(match);
-                                // });
+                                            // matches.forEach(match => {
+                                            //     noteBodyMatchesDiv.value(match);
+                                            // });
 
-                                // Set the textarea value to the matched text
-                                noteBodyMatchesDiv.value = matches.map(match => match[0]).join('\n');
+// Set the textarea value to the matched text
+    // noteBodyMatchesDiv.value = matches.map(match => match[0]).join('\n');
                                 
         
         
@@ -877,34 +849,10 @@
                 });
         </script>
 
-{{-- *********************************** DISPLAY PDF IMAGE BELOW ************************************* --}}
-    <br>
-    <br>
-    <hr>
-    <!-- <h2>PDF Image of the Fax Received:</h2> -->
-    
-<?php
-  //   if ($pdfData) {
-  //       $display_fax_image_link = 'data:application/pdf;base64,'. $pdfData .'';
-  //     // Display the embedded PDF
-  //       // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="data:application/pdf;base64,'.$pdfData.'" /></div></div><p>end of page</p></x-faxlayout>';
-  //       // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
-  //       echo '<iframe title="PDF Viewer" width="100%" height="1000px" src="'.$display_fax_image_link.'"></iframe>';
 
-        
-  //       // echo '</div></div></x-faxlayout>';
-  // } else {
-  //       echo '<h3>Error fetching fax image. Please try again.</3>';
-  // }
-?>
-
-
-{{-- CLOSING TWO LAYOUT DIVS  --}}
     </div>
 </div>
-{{-- CLOSING TWO LAYOUT DIVS  --}}
 
-{{-- *************************************************** SLOT ENDS HERE ************************************* --}}
 
 
 <?php
@@ -915,7 +863,7 @@
 
             // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
             echo '<h2 style="text-align:center">PDF Image of the Fax Received:</h2>';
-            echo '<iframe title="PDF Viewer" width="1500px" height="1000px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
+            echo '<iframe title="PDF Viewer" width="900px" height="800px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
             
             // echo '</div></div></x-faxlayout>';
       } else {

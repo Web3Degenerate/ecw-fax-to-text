@@ -166,9 +166,19 @@ Route::get('/fax-inbox', [NoteController::class, 'showFaxInbox']);
 
 Route::get('/view-single-fax/{faxid}', [NoteController::class, 'retrieveSingleFax']);
 
+//Loads Manual Fax Note Entry Form With All the Testing Fields: 
 Route::get('/manually-enter-single-fax-form/{faxid}', [NoteController::class, 'retrieveFaxFormForManualEntry']);
 
+Route::get('/manually-enter-clinic-time/{faxid}', [NoteController::class, 'retrieveFaxFormForManualEntryClean']);
+
+// Update Note from Manual Entry Form
+// Version 1:
 Route::post('/create-note-from-single-fax-form', [NoteController::class, 'createNoteFromManualFaxForm']);
+// Updated Version 2 on (2/26/2024):
+Route::post('/create-note-manually', [NoteController::class, 'createNoteManually']);
+
+
+
 
 
 //********************** INVOICES ROUTES ***************************************** */

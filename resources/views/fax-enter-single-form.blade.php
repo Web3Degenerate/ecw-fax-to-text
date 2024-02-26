@@ -883,25 +883,7 @@
         <hr>
         <h2>PDF Image of the Fax Received:</h2>
         
-    
-        <p>End of page</p>
-    
-    
-    <?php
-        if ($pdfData) {
-            $display_fax_image_link = 'data:application/pdf;base64,'. $pdfData .'';
-          // Display the embedded PDF
-            // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="data:application/pdf;base64,'.$pdfData.'" /></div></div><p>end of page</p></x-faxlayout>';
-            echo '<iframe title="PDF Viewer" width="100%" height="500px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
-            
-            // echo '</div></div></x-faxlayout>';
-      } else {
-            echo '<h3>Error fetching fax image. Please try again.</3>';
-      }
-    ?>
-    
-    
-    
+
     
     {{-- CLOSING TWO LAYOUT DIVS  --}}
         </div>
@@ -911,8 +893,22 @@
     {{-- *************************************************** SLOT ENDS HERE ************************************* --}}
     
     
-    </x-faxlayout>
+    <?php
+        if ($pdfData) {
+            $display_fax_image_link = 'data:application/pdf;base64,'. $pdfData .'';
+          // Display the embedded PDF
+            // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="data:application/pdf;base64,'.$pdfData.'" /></div></div><p>end of page</p></x-faxlayout>';
 
+            // echo '<iframe title="PDF Viewer" width="100%" height="500px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
+
+            echo '<iframe title="PDF Viewer" width="1500px" height="1000px" src="'.$display_fax_image_link.'" /></div></div><p>end of page</p></x-faxlayout>';
+            
+            // echo '</div></div></x-faxlayout>';
+      } else {
+            echo '<h3>Error fetching fax image. Please try again.</3>';
+      }
+    ?>
+    </x-faxlayout>
 
 
     // [

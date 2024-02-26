@@ -301,8 +301,6 @@ class NoteController extends Controller
     }
 
 
-
-
 // ************ UPDATE OR CREATE NOTE FROM MANUAL FAX FORM ******************************************//
     
     //#yolo 2/7/24

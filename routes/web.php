@@ -12,6 +12,8 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\InvoiceController;
 
+use App\Http\Controllers\ClinicController;
+
 
 
 /*
@@ -179,7 +181,9 @@ Route::post('/create-note-manually', [NoteController::class, 'createNoteManually
 
 
 
+// ******************* CLINIC ROUTES ********************************************** /
 
+Route::get('/add/provider', [ClinicController::class, 'showAddProviderForm']);
 
 //********************** INVOICES ROUTES ***************************************** */
 

@@ -151,10 +151,9 @@ public function createNoteManually(Request $request){
 
         $note->patient_id = $findPatient->id;
 
-        $note->patient_name = $get_pt_name; 
-        $note->pt_mrn = $get_pt_mrn; 
-
-        $note->patient_dob = $get_pt_dob; 
+            $note->patient_name = $get_pt_name; 
+            $note->pt_mrn = $get_pt_mrn; 
+            $note->patient_dob = $get_pt_dob; 
 
         $note->note_provider = $request->input('referring_provider'); 
 

@@ -18,6 +18,104 @@ class NoteController extends Controller
 {
     
 
+
+    private function calculateBillingCode($cumulativeClinicTime){
+        if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
+            return '99421';
+        } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
+            return '99422';
+        } elseif($cumulativeClinicTime >= 21){
+            return '99423';
+        } else {
+            return 'N/A';
+        }
+    }
+
+
+    private function checkBillingStatus($noteDate){
+            // Check if note_end_date is less than the current date in EST.
+            $currentDateEST = Carbon::now('America/New_York')->toDateString();
+            if ($noteDate < $currentDateEST) {
+                return 1;
+            } else {
+                return 0;
+            }
+    }
+
+
+    private function runBillingUpdate($note){
+
+        $patientID = $note->patient_id;
+        $note_end_date = $note->date_only;
+        $note_start_date = Carbon::parse($note_end_date)->subDays(7)->toDateString();
+
+
+        
+            // Sum the clinic time for the note(s) over the last 7 days.
+            $notes_over_LAST_seven_days = Note::where('patient_id', $patientID)
+            ->whereBetween('date_only', [$note_start_date, $note_end_date])
+            ->get();    
+
+            $clinic_time_over_LAST_seven_days = $notes_over_LAST_seven_days->sum('clinic_time');
+
+
+            //Check if earlier note exists
+            $first_note_over_LAST_seven_days = Note::where('patient_id', $patientID)
+                ->whereBetween('date_only', [$note_start_date, $note_end_date])
+                ->orderBy('date_only', 'asc')
+                ->first();
+
+ 
+            // If cumulative clinic time is over 5 mins
+            if($clinic_time_over_LAST_seven_days >= 5){
+                // $new_expiration_date = $first_note_over_last_seven_days->billing_expiration_date; // Could be same as note passed in 2/5/24 == 2/5/2024
+                // $note->billing_expiration_date = $new_expiration_date; 
+
+                $expiration_date = Carbon::parse($first_note_over_last_seven_days->date_only)->addDays(7)->toDateString();
+
+                // Update expiration_date of note
+                $note->billing_expiration_date = $expiration_date;
+
+                // Check if 7 day window is still open
+                $note->billing_status = $this->checkBillingStatus($expiration_date);
+
+            }else{
+                // No change to note's expiration date:
+                $expiration_date = $note->billing_expiration_date;
+                $note->billing_status = $this->checkBillingStatus($expiration_date);
+            }
+            
+    // Check time over NEXT seven days in the future from anchor date:
+            $notes_over_NEXT_seven_days = Note::where('patient_id', $patientID)
+            ->whereBetween('date_only', [$note_end_date, $expiration_date])
+            ->get();
+
+            $clinic_time_over_NEXT_seven_days = $notes_over_NEXT_seven_days->sum('clinic_time');
+
+            $cumulative_clinic_time = $clinic_time_over_LAST_seven_days + $clinic_time_over_NEXT_seven_days;
+
+            if($cumulative_clinic_time >= 5){
+                    // Merge the two collections
+                    $all_notes = $notes_over_LAST_seven_days->merge($notes_over_NEXT_seven_days);
+
+                    // Update the 'billing_status' field for all notes in the merged collection
+                    $all_notes->each(function ($note) {
+                        // Assuming 'billing_status' is a boolean field
+                        // $note->billing_status = 1;
+                        $note->billing_status_string = "pending_billing";
+                        $note->save();
+                    });
+            }
+
+            $billing_code = $this->calculateBillingCode($cumulative_clinic_time);
+
+
+            $note->save();
+
+        // $billingCode = BillingHelper::calculateBillingCode($cumulativeClinicTime);
+        
+    }
+
 // *********************************************************************************************************************************
 
 public function createNoteManually(Request $request){
@@ -84,6 +182,10 @@ public function createNoteManually(Request $request){
         // Save the billing_expiration_date field
         $note->billing_expiration_date = $formatted_billingExpirationDate; // 7 days from current note_date
 
+        // $billingStartingDate = $formatDateNoteCompleted->copy()->subDays(7)->format('Ymd');
+        // $formatted_billingStartingDate = Carbon::createFromFormat('Ymd', $billingStartingDate);
+        // $note->billing_starting_date = $formatted_billingStartingDate;
+
 
 //***********  OUTDATED attempt to Store the time in and time out *************************************************************** //
     $dateTimeOfNote = $request->input('note_date_time_iso');
@@ -109,98 +211,56 @@ public function createNoteManually(Request $request){
 
 // ************************************************************************************************************************************* //
 
-
 $patient_em_date_input = $request->input('em_date_iso'); //updated to pull from new template (2/26/2024)
 
 // Check if a valid date was picked up for patient's last E-M Office visit:
-if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
+    if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
 
         // Check if the given date already exists for the patient in the Visits table
         $existingVisit = Visit::where('patient_id', $findPatient->id)
             ->where('em_date', $patient_em_date_input)
             ->exists();
 
-        if (!$existingVisit) {
+
+    if (!$existingVisit) {
             // If the date doesn't exist, create a new entry in the Visits table
             $newEmVisit = new Visit();
             $newEmVisit->em_date = $patient_em_date_input;
             $newEmVisit->patient_id = $findPatient->id;;
             $newEmVisit->save();
         }
+    }else{
+        $note->billing_status_string = 'check';
     }
 
 
-//$dateNoteCompleted
-// Retrieve the 'Visits' for the patient within the last 7 days
-// $recentVisits = Visit::where('patient_id', $note->patient_id)
-$recentVisits = Visit::where('patient_id', $findPatient->id)
-    ->where('em_date', '>=', Carbon::parse($dateNoteCompleted)->subDays(7)->toDateString())
-    ->get();
+    $allVisits = Visit::where('patient_id', $findPatient->id)->get();
 
-    $recentVisits = Visit::where('patient_id', $findPatient->id)
-    ->whereBetween('em_date', [
-        Carbon::parse($patient_em_date_input)->subDays(7)->toDateString(),
-        Carbon::parse($patient_em_date_input)->addDays(7)->toDateString(),
-    ])
-    ->get();
-
-
-// Check if there are any recent visits within 7 days
-if ($recentVisits->isNotEmpty()) {
-    // The note date is within 7 days of an existing visit date
-    // Mark the note as invalid or handle accordingly
-    $note->billing_status_string = 'invalid';
-} else {
-    // The note date is not within 7 days of any existing visit date
-    // Proceed with other logic or mark as valid
-    // $note->billing_status_string = 'valid';
-    $note->billing_status_string = $recentVisits->isEmpty() ? 'check' : 'valid';
-}
-
-
-    
-    //ALREADY HAVE YYYYY-MM-DD with 'dos_date_from_template' input from NEW Template (2/26/2024)
-    // Get current note date
-    // $get_note_date_timerz = $request->input('note_date_time_iso');
-    // $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
-    // $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
-    
-    // Compare the Carbon instances
-        // $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
-        // if ($dateNoteCompleted > $seven_days_after_patient_em_date->format('Y-m-d')) {
-        //     $note->billing_status_string = 'pending';
-        // } else {
-        //     $note->billing_status_string = 'invalid';
-        // }
-
-        // // $note->billing_status_string = 'check';
-
-//***************************************** **********************************************************************************//
-// ***************** (2/26/2024) - REPLACE WITH NEW VISIT TABLE CHECK IF NOTE VALID ********************************* //
-//***************************************** **********************************************************************************//
-
-                        // if ($patient_em_date_input) {
-                        //    // Convert the patient_em_date_input string to a Carbon instance
-                        //     $seven_days_after_patient_em_date = Carbon::parse($patient_em_date_input)->addDays(6);
-
-                        //     // Get current note date
-                        //         $get_note_date_timerz = $request->input('note_date_time_iso');
-                        //         $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
-                        //         $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
-
-                        //     // Compare the Carbon instances
-                        //     if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
-                        //         $note->billing_status_string = 'pending';
-                        //     } else {
-                        //         $note->billing_status_string = 'invalid';
-                        //     }
-                        // } else {
-                        //     $note->billing_status_string = 'check';
-                        // }
-
-
-
-
+        // if(count($allVisits) === 0){
+        if(empty($allVisits)){
+            $note->billing_status_string = 'check';
+        }else{
+            $recentVisits = Visit::where('patient_id', $findPatient->id)
+            ->whereBetween('em_date', [
+                Carbon::parse($patient_em_date_input)->subDays(7)->toDateString(),
+                Carbon::parse($patient_em_date_input)->addDays(7)->toDateString(),
+            ])
+            ->get();
+                
+            // Check if there are any recent visits within 7 days
+            if ($recentVisits->isNotEmpty()) {
+                // The note date is within 7 days of an existing visit date
+                // Mark the note as invalid or handle accordingly
+                $note->billing_status_string = 'invalid';
+            } else {
+                // The note date is not within 7 days of any existing visit date
+                // Proceed with other logic or mark as valid
+                $note->billing_status_string = 'valid';
+                $this->runBillingUpdate($note);
+                // $note->billing_status_string = $recentVisits->isEmpty() ? 'check' : 'valid';
+            }
+        
+        }
 
 
 

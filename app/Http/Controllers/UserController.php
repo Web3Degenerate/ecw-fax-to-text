@@ -19,7 +19,7 @@ class UserController extends Controller
 
 
 
-    private function calculateBillingCode($cumulativeClinicTime){
+    public function calculateBillingCode($cumulativeClinicTime){
         if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
             return '99421';
         } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){

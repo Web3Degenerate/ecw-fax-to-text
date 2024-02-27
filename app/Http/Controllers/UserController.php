@@ -410,6 +410,31 @@ class UserController extends Controller
             // $patients = Patient::all();
             $patients = Patient::where('status',0)->get(); //get all active patients
             
+            $invoices = Invoice::all();
+
+            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients, 'invoices' => $invoices]);
+            // return 'you are logged in'; 
+        } else {
+            // return view('homepage');
+            $ourName = 'Guest';
+            $animals = ['Meowsalot', 'Barksalot', 'Purrsloud'];
+            $hardCodedMessage = '';
+            return view('homepage', ['allAnimals' => $animals, 'name' => $ourName, 'catname' => 'Meowsalot', 'guestMessage' => $hardCodedMessage]);
+        }
+    }
+
+
+//TESTING HOME PAGE - IGNORE - EXTRACT TO InvoiceController:
+    public function showCorrectHomepageTestingIgnore(){
+        //Check if current user is logged in with globally available 'auth()'
+        // auth()->check() //true or false if logged in
+        if (auth()->check()) {
+            $hardCodedMessage = '';
+
+            $users = User::all();
+            // $patients = Patient::all();
+            $patients = Patient::where('status',0)->get(); //get all active patients
+
 
             // *** FIRST TEST TO SUM ALL PENDING NOTES AND UPDATE FIELD ON USER => clinic_time_counter **********//
                             // foreach($patients as $patient){        
@@ -475,6 +500,12 @@ class UserController extends Controller
             return view('homepage', ['allAnimals' => $animals, 'name' => $ourName, 'catname' => 'Meowsalot', 'guestMessage' => $hardCodedMessage]);
         }
     }
+
+
+
+
+
+
 
 // &&& #DCT &&& #############################################################################################################
     public function showEnrollUserForm(){
@@ -637,6 +668,12 @@ class UserController extends Controller
     }
 
 
+
+
+
+
+
+
 // *************************** PROFILE RELATED FUNCTIONS **************************************//
 
 // (3:45) - Set up private function to handle duplicate code in tab functions: 
@@ -663,6 +700,12 @@ class UserController extends Controller
             'followingCount' => $user->followingTheseUsers()->count()
         ]);
     }
+
+
+
+
+
+
 
 // *** ~(2:40) - Set up view for individual patient view: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34400818#overview
     // GET INSTANCE OF USER with TYPE HINTING = User <{name-used-in-routes}>

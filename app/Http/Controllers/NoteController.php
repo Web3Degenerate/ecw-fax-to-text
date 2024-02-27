@@ -50,7 +50,6 @@ class NoteController extends Controller
         $note_start_date = Carbon::parse($note_end_date)->subDays(7)->toDateString();
 
 
-        
             // Sum the clinic time for the note(s) over the last 7 days.
             $notes_over_LAST_seven_days = Note::where('patient_id', $patientID)
             ->whereBetween('date_only', [$note_start_date, $note_end_date])

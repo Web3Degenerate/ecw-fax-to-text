@@ -17,28 +17,6 @@ use App\Models\Visit;
 class NoteController extends Controller
 {
     
-    
-    
-//See #DCT NurseController @ storeNurseNote
-    public function storeNurseNote(Request $request){
-        //Create Note
-        $note = new Note;
-        $note->patient_name = $request->input('patient_name'); 
-        $note->mrn = $request->input('user_mrn'); 
-        $note->user_id = $request->input('user_id'); 
-        $note->note_date = $request->input('note_date');
-            
-        //1/6/21 update - SOLUTION! $datetime_from = (new Carbon($thestime))->subMinutes(45)->format('Y-m-d H:i');
-        // FROM: https://stackoverflow.com/questions/11688829/php-use-strtotime-to-subtract-minutes-from-a-date-time-variable
-        // $note->time_in = $request->input('time_in');
-        // https://stackoverflow.com/questions/17717911/how-to-subtract-minutes/17718000#:~:text=php%20%24date%20%3D%20new%20DateTime(,i%3As')%3B%3F%3E&text=To%20subtract%2015%20minutes%20you,number%20of%20minutes%20you%20want.
-        // ****
-        // Fixed AM/PM issue with upper case 'H' to convert to 24 hour: https://www.php.net/manual/en/datetime.format.php
-            
-            $time_out_calc = Carbon::parse($request->input('time_out'))->format('H:i:s');
-            $clinc_time_manual = $request->input('clinic_time'); 
-            $time_in_calc = (new Carbon($time_out_calc))->subMinutes($clinc_time_manual)->format('H:i:s');
-        }
 
 // *********************************************************************************************************************************
 
@@ -59,22 +37,20 @@ public function createNoteManually(Request $request){
         'name' => $get_pt_name,
         'dob' => $get_pt_dob,
         'referring_provider' => $get_pt_referring_provider
-        // ,
-        // 'em_date' => $get_pt_em_date
     ]);
 
+    
+//********************************************************************************** */        
+    $fax_details_id = $request->input('fax_details_id');
+    $note = Note::firstOrNew(['fax_details_id' => $fax_details_id]);
+        // $note = Note::where('fax_details_id', $fax_details_id)->first();
 
-    $get_standardized_date_time_string = $request->input('note_date_time_string_standardized');
-
-        $fax_details_id = $request->input('fax_details_id');
-
-        $note = Note::where('fax_details_id', $fax_details_id)->first();
-
-        if($note){
-            $note = $note;
-        }else{
-            $note = new Note;
-        }
+        // if($note){
+        //     $note = $note;
+        // }else{
+        //     $note = new Note;
+        // }
+//********************************************************************************** */        
 
         $note->patient_id = $findPatient->id;
 
@@ -85,64 +61,61 @@ public function createNoteManually(Request $request){
 
         $note->note_provider = $request->input('referring_provider'); 
 
-        $note->date_time_as_string = $request->input('note_date_time_string_standardized');
+        
+        // Set clinic time to variable so it can be used to calculate the time-in and time-out below.
+        $clinicTime = $request->input('clinic_time');
+        $dateNoteCompleted = $request->input('dos_date_from_template');
+        
+        // $note->clinic_time = $request->input('clinic_time');
+        $note->clinic_time = $clinicTime;
+ 
+// Save as just date 'YYYY-MM-DD'
+        // $note->date_time_as_string = $request->input('note_date_time_string_standardized');
+        $note->date_time_as_string = $dateNoteCompleted;
+        $note->date_only = $dateNoteCompleted;
+        
+        // Save note as 'YYYY-MM-DD 00:00:00'
+        $formatDateNoteCompleted = Carbon::parse($dateNoteCompleted);
+        $note->date_time = $formatDateNoteCompleted;
+
+        // Add 7 days to the date_only field
+        $billingExpirationDate = $formatDateNoteCompleted->copy()->addDays(7)->format('Ymd');
+        $formatted_billingExpirationDate = Carbon::createFromFormat('Ymd', $billingExpirationDate);
+        // Save the billing_expiration_date field
+        $note->billing_expiration_date = $formatted_billingExpirationDate; // 7 days from current note_date
 
 
-$dateTimeOfNote = $request->input('note_date_time_iso');
-$clinicTime = $request->input('clinic_time');
-
-    //Store the time spent in minutes: 
-    $note->clinic_time = $clinicTime;   // example 2
-
+//***********  OUTDATED attempt to Store the time in and time out *************************************************************** //
+    $dateTimeOfNote = $request->input('note_date_time_iso');
 // Modified dateTime and time fields: Example: 01/31/2024 08:19 PM
     $carbonDateTime = Carbon::parse($dateTimeOfNote);
 
-    $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
-
+// $note->date_time = $carbonDateTime; // stores "01/31/2024 08:19 PM"
     $note->time_out = $carbonDateTime->format('H:i:s'); // stores "08:19 PM as 20:19:00"
+    $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('H:i:s'); // saves as "20:17:00"
 
-    // Format date_only
-    $current_note_date_on_timestamp = $carbonDateTime->toDateString();
-    $note->date_only = $current_note_date_on_timestamp;
+                // Format date_only - removed
+                // $current_note_date_on_timestamp = $carbonDateTime->toDateString();
+                // $note->date_only = $current_note_date_on_timestamp;
 
-    // Add 7 days to the date_only field
-    $billingExpirationDate = $carbonDateTime->copy()->addDays(7)->format('Ymd');
-    $formatted_billingExpirationDate = Carbon::createFromFormat('Ymd', $billingExpirationDate);
+// // Add 7 days to the date_only field
+// $billingExpirationDate = $carbonDateTime->copy()->addDays(7)->format('Ymd');
+// $formatted_billingExpirationDate = Carbon::createFromFormat('Ymd', $billingExpirationDate);
 
-    // Save the billing_expiration_date field
-    $note->billing_expiration_date = $formatted_billingExpirationDate; // 7 days from current note_date
+// // Save the billing_expiration_date field
+// $note->billing_expiration_date = $formatted_billingExpirationDate; // 7 days from current note_date
+
+//***********  END OF OUTDATED attempt to Store the time in and time out *************************************************************** //
 
 // ************************************************************************************************************************************* //
 
 
-$patient_em_date_input = $request->input('em_date_iso');
+$patient_em_date_input = $request->input('em_date_iso'); //updated to pull from new template (2/26/2024)
 
-// Quickly update patient em_date if valid one provided
+// Check if a valid date was picked up for patient's last E-M Office visit:
 if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
-    // $patient_em_date = $patient_em_date_input;
 
-
-    $getAllEmVisits = Visit::where('patient_id', $findPatient->id)->get();
-
-
-    $getLastEmVisit = Visit::where('patient_id', $findPatient->id)
-    ->orderBy('em_date', 'desc')
-    ->first();
-
-        if($getLastEmVist === null || $patient_em_date_input !== $getLastEmVisit->em_date){
-                $addNewEmVisit = Visit::new();
-                $addNewEmVisit->em_date = $patient_em_date_input;
-                $addNewEmVisit->patient_id = $findPatient->id;
-                $addNewEmVisit->save();
-
-                $findPatient->em_date = $patient_em_date_input;
-                $findPatient->save();
-        }
-
-
-//******************************* TEST CHAT GPT - 2/23/24 */
-
-// Check if the given date already exists for the patient in the Visits table
+        // Check if the given date already exists for the patient in the Visits table
         $existingVisit = Visit::where('patient_id', $findPatient->id)
             ->where('em_date', $patient_em_date_input)
             ->exists();
@@ -154,63 +127,99 @@ if($patient_em_date_input !== '0911-09-11' && $patient_em_date_input !== null){
             $newEmVisit->patient_id = $findPatient->id;;
             $newEmVisit->save();
         }
-
-
-//*************************************** END OF TEST 2/23/24 */
-
-        $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
-
-        // Get current note date
-            $get_note_date_timerz = $request->input('note_date_time_iso');
-            $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
-            $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
-    
-        // Compare the Carbon instances
-        if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
-            $note->billing_status_string = 'pending';
-        } else {
-            $note->billing_status_string = 'invalid';
-        }
-        
-    // }
-
-}else{
-    $note->billing_status_string = 'check';
-}
-
-
-
-if ($patient_em_date) {
-    // Convert the patient_em_date string to a Carbon instance
-    $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
-
-    // Get current note date
-        $get_note_date_timerz = $request->input('note_date_time_iso');
-        $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
-        $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
-
-    // Compare the Carbon instances
-    if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
-        $note->billing_status_string = 'pending';
-    } else {
-        $note->billing_status_string = 'invalid';
     }
+
+
+//$dateNoteCompleted
+// Retrieve the 'Visits' for the patient within the last 7 days
+// $recentVisits = Visit::where('patient_id', $note->patient_id)
+$recentVisits = Visit::where('patient_id', $findPatient->id)
+    ->where('em_date', '>=', Carbon::parse($dateNoteCompleted)->subDays(7)->toDateString())
+    ->get();
+
+    $recentVisits = Visit::where('patient_id', $findPatient->id)
+    ->whereBetween('em_date', [
+        Carbon::parse($patient_em_date_input)->subDays(7)->toDateString(),
+        Carbon::parse($patient_em_date_input)->addDays(7)->toDateString(),
+    ])
+    ->get();
+
+
+// Check if there are any recent visits within 7 days
+if ($recentVisits->isNotEmpty()) {
+    // The note date is within 7 days of an existing visit date
+    // Mark the note as invalid or handle accordingly
+    $note->billing_status_string = 'invalid';
 } else {
-    $note->billing_status_string = 'check';
+    // The note date is not within 7 days of any existing visit date
+    // Proceed with other logic or mark as valid
+    // $note->billing_status_string = 'valid';
+    $note->billing_status_string = $recentVisits->isEmpty() ? 'check' : 'valid';
 }
 
+
+    
+    //ALREADY HAVE YYYYY-MM-DD with 'dos_date_from_template' input from NEW Template (2/26/2024)
+    // Get current note date
+    // $get_note_date_timerz = $request->input('note_date_time_iso');
+    // $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+    // $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+    
+    // Compare the Carbon instances
+        // $seven_days_after_patient_em_date = Carbon::parse($patient_em_date)->addDays(6);
+        // if ($dateNoteCompleted > $seven_days_after_patient_em_date->format('Y-m-d')) {
+        //     $note->billing_status_string = 'pending';
+        // } else {
+        //     $note->billing_status_string = 'invalid';
+        // }
+
+        // // $note->billing_status_string = 'check';
+
+//***************************************** **********************************************************************************//
+// ***************** (2/26/2024) - REPLACE WITH NEW VISIT TABLE CHECK IF NOTE VALID ********************************* //
+//***************************************** **********************************************************************************//
+
+                        // if ($patient_em_date_input) {
+                        //    // Convert the patient_em_date_input string to a Carbon instance
+                        //     $seven_days_after_patient_em_date = Carbon::parse($patient_em_date_input)->addDays(6);
+
+                        //     // Get current note date
+                        //         $get_note_date_timerz = $request->input('note_date_time_iso');
+                        //         $format_note_date_timerz = Carbon::parse($get_note_date_timerz);
+                        //         $compare_note_date_onlyz = $format_note_date_timerz->format('Y-m-d');
+
+                        //     // Compare the Carbon instances
+                        //     if ($compare_note_date_onlyz > $seven_days_after_patient_em_date->format('Y-m-d')) {
+                        //         $note->billing_status_string = 'pending';
+                        //     } else {
+                        //         $note->billing_status_string = 'invalid';
+                        //     }
+                        // } else {
+                        //     $note->billing_status_string = 'check';
+                        // }
+
+
+
+
+
+
+
+
+//***************************************** **********************************************************************************//
+// ***************** END OF - REPLACE WITH NEW VISIT TABLE CHECK IF NOTE VALID (2/26/2024) -  ************************* //
+//***************************************** **********************************************************************************//
 
     $note->review_status = 1; //migration on 2/4/2024 as another boolean value, 0 needs review, 1 review complete.
-
-    $note->time_in = $carbonDateTime->subMinutes($clinicTime)->format('H:i:s'); // saves as "20:17:00"
     
     $note->save();   
     //******************* END OF CREATE NOTE  *************************** */           
-
+// Convert the date format
+    $odem_date = $request->input('dos_date_from_template');
+    $display_odem_dos = Carbon::createFromFormat('Y-m-d', $odem_date)->format('d/m/Y');;
 
 // ******************** END of UpdateOrCreate Invoice Object => finally return back() to the view: **********//
     // return back()->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
-    return redirect('/fax-inbox')->with('success', 'Note on ' . $get_standardized_date_time_string . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
+    return redirect('/fax-inbox')->with('success', 'Note on ' . $display_odem_dos . ' for patient ' . $get_pt_name . ' ( ' . $get_pt_mrn . ') was added to your practice\'s Online Digital E-M program.');
 
 // }
 

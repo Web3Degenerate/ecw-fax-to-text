@@ -14,6 +14,11 @@ use Carbon\Carbon;
 
 use App\Models\Visit;
 
+use App\Models\Name;
+use App\Models\Provider;
+use App\Models\Clinic;
+
+
 class NoteController extends Controller
 {
     
@@ -155,7 +160,16 @@ public function createNoteManually(Request $request){
             $note->pt_mrn = $get_pt_mrn; 
             $note->patient_dob = $get_pt_dob; 
 
-        $note->note_provider = $request->input('referring_provider'); 
+
+        $providerNameFromInput = $request->input('referring_provider'); 
+        $findProvider = Name::where('provider_name', $providerNameFromInput)->get();
+
+        if($findProvider){
+            $note->note_provider = $findProvider->provider_name;
+        }else{
+            $note->note_provider = $providerNameFromInput;
+        }
+            
 
         
         // Set clinic time to variable so it can be used to calculate the time-in and time-out below.

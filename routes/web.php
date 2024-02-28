@@ -183,7 +183,23 @@ Route::post('/create-note-manually', [NoteController::class, 'createNoteManually
 
 // ******************* CLINIC ROUTES ********************************************** /
 
+Route::get('/add/clinic', [ClinicController::class, 'showAddClinicForm']);
+Route::post('/save/new/clinic', [ClinicController::class, 'registerNewClinic']);
+
+
+// ******************* PROVIDER ROUTES ********************************************** /
+
 Route::get('/add/provider', [ClinicController::class, 'showAddProviderForm']);
+Route::post('/save/new/provider', [ClinicController::class, 'registerNewProvider']);
+
+
+// ******************* (provider) NAMES ROUTES ********************************************** /
+
+Route::get('/add/name', [ClinicController::class, 'showAddNameForm']);
+Route::post('/save/new/name', [ClinicController::class, 'registerNewName']);
+
+
+
 
 //********************** INVOICES ROUTES ***************************************** */
 

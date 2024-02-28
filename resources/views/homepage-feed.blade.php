@@ -2,6 +2,16 @@
 
 <x-layout>
 
+   <!-- &&& #DCT &&& - guest hardcoded message -->
+   @if ($guestMessage)
+    <div class="container container--narrow">
+      <div class="alert alert-success text-center">
+        {{ $guestMessage }}
+      </div>
+    </div>
+
+ @endif
+
     {{-- <div class="container py-md-5 container--narrow">
         <div class="text-center">
           <h2>Hello <strong>{{ ucwords(auth()->user()->username) }}</strong>, your feed is empty.</h2>

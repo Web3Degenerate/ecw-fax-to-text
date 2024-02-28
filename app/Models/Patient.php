@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Note; //Do I need to import Note class?
 use App\Models\Invoice; //can't hurt to add?
+use App\Models\Visit;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +30,12 @@ class Patient extends Model
         //A user Has MANY posts:
         // hasMany(target class, column powering this relationship)
         return $this->hasMany(Invoice::class, 'patient_id');
+    }
+
+    public function visits() {
+        //A user Has MANY posts:
+        // hasMany(target class, column powering this relationship)
+        return $this->hasMany(Visit::class, 'patient_id');
     }
 
 }

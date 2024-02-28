@@ -117,12 +117,11 @@ public function showAddProviderForm(){
 }
 
 
-// ['clinic_name', 'clinic_type', 'clinic_email', 'clinic_fax'];
 
 public function registerNewProvider(Request $request){
 
     // Fetch the clinics from your data source
-    $clinics = Clinic::all(); // Replace 'Clinic' with your actual model name
+    $clinics = Clinic::all();
 
     // Create an array of valid clinic IDs
     $validClinicIds = $clinics->pluck('id')->toArray();
@@ -184,12 +183,69 @@ public function registerNewProvider(Request $request){
 
 
     public function showAddNameForm(){
+        //Logged in user can register another user:
+        if (auth()->check()) {
+            $hardCodedMessage = 'NOTE: Enter a known version of the provider\'s name.';
+            $providers = Provider::all();
+            return view('provider-name-add-new', ['guestMessage' => $hardCodedMessage, 'providers' => $providers]);
 
+        } else {
+    // redirect back to GUEST homepage: (let guest create the first user)
+            // $hardCodedMessage = 'Go ahead and register as a guest.';
+            // return view('homepage-enroll', ['guestMessage' => $hardCodedMessage]);
+            // return view('homepage-enroll')->with('failure', 'Go ahead and register as guest...');
+            // $hardCodedMessage = 'You do not have permission to add a provider name.';
+            // return view('/homepage-feed', ['guestMessage' => $hardCodedMessage]); //return view('/') => View [.] not found.
+            return redirect('/')->with('failure', 'You do not have the permissions to add a new provider.');
+        }  
     }
 
 
 
     public function registerNewName(Request $request){
+
+
+            // Fetch the clinics from your data source
+            $providers = Provider::all();
+
+            // Create an array of valid clinic IDs
+            $validProviderIds = $providers->pluck('id')->toArray();
+
+
+            $incomingFields = $request->validate([
+                // 'username' => 'required', //updated to array in https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207648#content
+                //&&& #DCT NEW FIELDS &&&
+                'provider_id' => ['required', Rule::in($validProviderIds)], // Add Rule::in rule for the 'provider' field
+                'provider_name' => ['required']
+            ]);
+
+
+            $getProvider = Provider::find($request->input('provider_id'));
+            $getProviderClinic = Clinic::find($getProvider->clinic_id);
+
+//ADD CHECK FOR STRING provider_name MATCH/DUPLICATE
+            $name = new Name;
+
+            $name->provider_id = $request->input('provider_id'); 
+            $name->provider_name = $request->input('provider_name'); 
+            $name->clinic_id = $getProviderClinic->id; 
+
+            $name->save();   
+
+
+            //flash message variables:
+            $displayProviderName = $getProvider->provider_name;
+            $displaySpelling = $request->input('provider_name');
+
+
+
+            $hardCodedMessage = 'Success! ' . $displaySpelling . ' has been added for Provider ' . $displayProviderName . ' in the clinic of ' . $getProviderClinic->clinic_name . '.';
+
+            $users = User::all();
+            // $patients = Patient::all();
+            $patients = Patient::where('status',0)->get(); //get all active patients           
+            $invoices = Invoice::all();
+            return view('homepage-feed', ['guestMessage' => $hardCodedMessage, 'users' => $users, 'patients' => $patients, 'invoices' => $invoices]);
 
     }
 

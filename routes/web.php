@@ -205,3 +205,7 @@ Route::post('/save/new/name', [ClinicController::class, 'registerNewName']);
 
 
 Route::get('/invoice/{id}', [InvoiceController::class, 'showSingleInvoice']);
+
+// 
+// Route::post('/update/billing', [ClinicController::class, 'registerNewName']);
+Route::get('/update/billing', [InvoiceController::class, 'runBillingUpdate']);

@@ -10,6 +10,13 @@
 
 <x-layout>
 
+  @unless($invoices->isEmpty())
+    <h3>$invoices is not empty</h3>
+  @else
+  <h3>$invoices is are empty</h3>
+  @endunless
+
+
     <div class="container py-md-5 container--narrow">
         <h2>
           {{-- <img class="avatar-small" src="https://gravatar.com/avatar/b9408a09298632b5151200f3449434ef?s=128" /> {{ ucwords($sharedData['username']) }} --}}
@@ -21,25 +28,25 @@
           |  Total Time: {{ $locatedInvoice->cumulative_clinic_time ?? 'Not Found'}}
         </h2>   
 {{-- (3:40) - Add (at)auth wrapper around form--}}
-    {{-- @auth
+    {{-- @auth --}}
 
-    <a href="/edit-patient/{{ $patient->id }}" class="btn btn-primary btn-sm">Edit Patient {{ $patient->name }}<i class="fas fa-user-plus"></i></a>
-    @endauth
+    <!-- <a href="/edit-patient/{{ $patient->id }}" class="btn btn-primary btn-sm">Edit Patient {{ $patient->name }}<i class="fas fa-user-plus"></i></a> -->
+    {{-- @endauth --}}
         </h2>
   
-        <div class="profile-nav nav nav-tabs pt-2 mb-4">
+        <!-- <div class="profile-nav nav nav-tabs pt-2 mb-4">
           <a href="/hub/{{ $patient->id }}" class="profile-nav-link nav-item nav-link {{ Request::segment(3) == "" ? 'active' : '' }}">Activity Log For {{ $patient->name }} </a>
           <a href="/hub/{{ $patient->id }}/billing" class="profile-nav-link nav-item nav-link {{ Request::segment(3) == "billing" ? 'active' : '' }}">Patient Billing History</a>
           <a href="/hub/{{ $patient->id }}/edit-patient" class="profile-nav-link nav-item nav-link {{ Request::segment(3) == "edit-patient" ? 'active' : '' }}">Optional Tab 3</a>
-        </div> --}}
+        </div>  -->
 
 
 {{-- Added NEW SLOT in video 41 (~3:20): https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview --}}
 {{-- Later, we'll come back and add JavaScript to this to make a SPA --}}
 
-        {{-- <div class="profile-slot-content">
-            {{ $slot }}            
-        </div> --}}
+        {{-- <div class="profile-slot-content"> --}}
+            {{-- $slot --}}            
+        {{-- </div> --}}
 
 
 {{-- (5:40) Stripped out the code for User's own posts (when click on avatar) to `profile-posts.blade.php`: https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34503222#overview --}}

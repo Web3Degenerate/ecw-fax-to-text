@@ -23,7 +23,10 @@ class InvoiceController extends Controller
         $patient = Patient::find($patientId);
         $locatedInvoiceNotes = Note::where('billing_number',$locatedInvoice->id)->get();
 
-        return view('invoice-single', ['locatedInvoice' => $locatedInvoice, 'notes' => $locatedInvoiceNotes, 'patient' => $patient]);
+        $invoices = $patient->invoices()->get();
+
+        return view('invoice-single', ['locatedInvoice' => $locatedInvoice, 'notes' => $locatedInvoiceNotes, 
+        'patient' => $patient, 'invoices' => $invoices]);
 
     }
 

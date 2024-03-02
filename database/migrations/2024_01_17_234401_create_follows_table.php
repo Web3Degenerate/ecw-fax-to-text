@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('follows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained(); //FOLLOWER - stores user doing the following        
-        //OG way of foreign key
+        //OG way of foreign key we are using as "raw id numbers"
             $table->unsignedBigInteger('followeduser'); //User BEING followed.
             $table->foreign('followeduser')->references('id')->on('users');
+
             $table->timestamps();
         });
     }

@@ -37,7 +37,9 @@
             <h5>on {{ $display_date_in_EST }} at {{ $display_time_in_EST }}</h5>
             {{-- <p class="lead text-muted">If you don&rsquo;t have any friends to follow that&rsquo;s okay; you can use the &ldquo;Search&rdquo; feature in the top menu bar to find content written by people with similar interests and then follow them.</p> --}}
             <p class="lead text-muted">Here is the time collected for Online Digital E-M services from your practice. Click on a patient to view their E-M history and manage their account.</p>
-        </div>
+
+            <b>Access the <a href="https://mycw23.eclinicalweb.com/portal1906/jsp/100mp/login_otp.jsp">ECW Patient Portal Here.</a></b>
+          </div>
     
       {{-- <div class="row"> --}}
 

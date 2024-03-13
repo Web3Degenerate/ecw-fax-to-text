@@ -23,6 +23,11 @@ use App\Models\Clinic;
 
 class ClinicController extends Controller
 {
+
+    public function getPreviousInvoices(){
+        //add new table here.
+        return back();
+    }
     
 
         public function showAddClinicForm(){

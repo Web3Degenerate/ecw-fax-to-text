@@ -38,7 +38,8 @@
               <img title="My Profile" data-toggle="tooltip" data-placement="bottom" style="width: 50px; height: 50px; border-radius: 16px" src="/images/DentCareTeam-Sidebar-Logo-Zoom.jpg" />
               Digital Online R-M
             </a>
-        </h4>
+          </h4>
+          <a href="https://www.medicare.gov/basics/get-started-with-medicare/sign-up/how-do-i-sign-up-for-medicare" class="btn btn-success">Enroll in Medicare</a>
         {{-- (12:55): https://www.udemy.com/course/lets-learn-laravel-a-guided-path-for-beginners/learn/lecture/34207654#overview --}}
         
         @auth

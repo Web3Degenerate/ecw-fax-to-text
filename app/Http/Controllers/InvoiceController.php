@@ -17,6 +17,13 @@ class InvoiceController extends Controller
 {
     
 
+    public function updatePatientList(){
+
+        $findPatients = Patient::all(); 
+
+        return back();
+    }
+
     public function showSingleInvoice($id){
         $locatedInvoice = Invoice::find($id);
         $patientId = $locatedInvoice->patient_id;

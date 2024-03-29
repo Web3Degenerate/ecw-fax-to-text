@@ -24,6 +24,22 @@ class InvoiceController extends Controller
         return back();
     }
 
+    private function calculateBillingCode($cumulativeClinicTime){
+        if($cumulativeClinicTime >= 5 && $cumulativeClinicTime < 11){
+            return '99421';
+        } elseif($cumulativeClinicTime >= 11 && $cumulativeClinicTime < 21){
+            return '99422';
+        } elseif($cumulativeClinicTime >= 21){
+            return '99423';
+        } else {
+            return 'N/A';
+        }
+    }
+
+
+
+// Pacific Update *********************************************************
+
     public function showSingleInvoice($id){
         $locatedInvoice = Invoice::find($id);
         $patientId = $locatedInvoice->patient_id;
